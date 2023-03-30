@@ -13,7 +13,10 @@ export default class AuthController extends BaseController {
 
   login = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      let result = await this.service.handleLogin("username", "password");
+      let result = await this.service.handleLogin(
+        req.body.username,
+        req.body.password
+      );
       return res.json(result);
     } catch (e) {
       next(e);
