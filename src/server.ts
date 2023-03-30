@@ -8,6 +8,7 @@ import express, {
   Router,
 } from "express";
 import http, { createServer } from "http";
+import multer from "multer";
 import CustomError from "./Errors/CustomError";
 import { JWTValidatorMiddleware } from "./Middlewares/JWTValidatorMiddleware";
 import AuthRouter from "./Modules/Authentication/auth.routes";
@@ -37,11 +38,14 @@ export default class ReservioServer {
   }
 
   private middleware() {
+    let upload = multer();
     // CORS
     this.instance.use(cors());
     // JSON body parser
     this.instance.use(express.json());
     this.instance.use(express.urlencoded({ extended: true }));
+
+    this.instance.use(upload.any());
   }
 
   private routing() {
@@ -56,8 +60,8 @@ export default class ReservioServer {
       });
     });
     // JWTValidatorMiddleware
-    this.instance.use("/", JWTValidatorMiddleware, defaultRoute);
     this.instance.use("/auth", new AuthRouter(this.db).router);
+    this.instance.use("/", JWTValidatorMiddleware, defaultRoute);
   }
 
   private errorHandling() {
