@@ -11,8 +11,10 @@ export default async function handleImageUpload(
   fileName: string
 ) {
   const config = {
-    accessKeyId: process.env.AWS_ACCESS_KEY,
-    secretAccessKey: process.env.AWS_SECRETE_ACCESS_KEY,
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY,
+      secretAccessKey: process.env.AWS_SECRETE_ACCESS_KEY,
+    },
     region: "ap-southeast-1",
   } as S3ClientConfig;
 
