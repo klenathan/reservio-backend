@@ -1,9 +1,9 @@
 import UnauthenticatedError from "@/Errors/UnauthenticatedError";
 import generateTokenPair from "@/Utils/generateTokenPair";
+import handleImageUpload from "@/Utils/HandleImages/handleImgUpload";
 import { PrismaClient } from "@prisma/client";
 import BaseService from "../Base/BaseService";
 import { comparePassword } from "./Utils/passwordUtils";
-
 export default class AuthService extends BaseService {
   public constructor(db: PrismaClient) {
     super(db);
@@ -31,5 +31,9 @@ export default class AuthService extends BaseService {
       accessToken: accessToken,
       refreshToken: refreshToken,
     };
+  };
+
+  handleSignUp = async (avatar: Express.Multer.File) => {
+    return await handleImageUpload(avatar);
   };
 }
