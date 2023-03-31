@@ -1,3 +1,4 @@
+////// Dependencies
 import { PrismaClient } from "@prisma/client";
 import cors from "cors";
 import express, {
@@ -10,8 +11,14 @@ import express, {
 import http, { createServer } from "http";
 import multer from "multer";
 import CustomError from "./Errors/CustomError";
+
+////// Middlewares
 import { JWTValidatorMiddleware } from "./Middlewares/JWTValidatorMiddleware";
+
+////// Routes
 import AuthRouter from "./Modules/Authentication/auth.routes";
+import UserRouter from "./Modules/Users/user.routes";
+import VendorRouter from "./Modules/Vendor/vendor.routes";
 
 export default class ReservioServer {
   public instance: Application;
@@ -24,7 +31,7 @@ export default class ReservioServer {
     this.instance = express();
     this.httpServer = createServer(this.instance);
     this.PORT = PORT;
-    this.db = new PrismaClient();
+    this.db = new PrismaClient({ errorFormat: "minimal" });
 
     this.middleware();
     this.routing();
@@ -52,7 +59,6 @@ export default class ReservioServer {
     let defaultRoute = Router();
     defaultRoute.get("/", (req, res) => {
       return res.json({
-        user: req.body.user,
         title: "RESERVIO's ExpressJS EC2 API",
         version: "v0.1.0",
         documentation: "blank_for_now",
@@ -62,7 +68,16 @@ export default class ReservioServer {
     });
     // JWTValidatorMiddleware
     this.instance.use("/auth", new AuthRouter(this.db).router);
-    this.instance.use("/", JWTValidatorMiddleware, defaultRoute);
+    this.instance.use("/user", new UserRouter(this.db).router);
+    this.instance.use("/vendor", new VendorRouter(this.db).router);
+    this.instance.get("/", defaultRoute);
+    this.instance.use("*", (req, res) => {
+      res.status(404).json({
+        code: 404,
+        title: "Reservio page not found",
+        message: `Path ${req.url} cannot be found`,
+      });
+    });
   }
 
   private errorHandling() {

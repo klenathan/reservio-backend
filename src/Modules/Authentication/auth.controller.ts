@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import BaseController from "../Base/BaseController";
 
 import AuthService from "./auth.service";
+import DTOSignUp from "./Types/DTOSignUp";
 
 export default class AuthController extends BaseController {
   declare service: AuthService;
@@ -25,15 +26,10 @@ export default class AuthController extends BaseController {
   };
   signup = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (req.files?.length == 0) {
-        throw new CustomError(
-          "INVALID_AVATAR",
-          "Please include an avatar",
-          400
-        );
-      }
-      const avatar = req.files as unknown as Express.Multer.File[];
-      let result = await this.service.handleSignUp(avatar[0]);
+      let signUpData: DTOSignUp = req.body;
+      let avatar = req.files as unknown as Express.Multer.File[];
+
+      let result = await this.service.handleSignUp(signUpData, avatar[0]);
       return res.json(result);
     } catch (e) {
       next(e);

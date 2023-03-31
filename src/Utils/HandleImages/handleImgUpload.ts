@@ -5,10 +5,11 @@ import {
   S3Client,
   S3ClientConfig,
 } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { randomUUID } from "crypto";
 
-export default async function handleImageUpload(img: Express.Multer.File) {
+export default async function handleImageUpload(
+  img: Express.Multer.File,
+  fileName: string
+) {
   const config = {
     accessKeyId: process.env.AWS_ACCESS_KEY,
     secretAccessKey: process.env.AWS_SECRETE_ACCESS_KEY,
@@ -17,18 +18,15 @@ export default async function handleImageUpload(img: Express.Multer.File) {
 
   const client = new S3Client(config);
 
-  const fileName = `avatar/${randomUUID()}-${img.originalname}`;
-
   const command = new PutObjectCommand({
-    Bucket: "reservio",
+    Bucket: "namthai-learn-s3", // reservio
     Key: fileName,
     Body: img.buffer,
   });
 
   try {
     const response = await client.send(command);
-    console.log(response);
-    return response;
+    return fileName;
   } catch (err: any) {
     console.log(err);
     throw new CustomError(err.name, err.message, 400);

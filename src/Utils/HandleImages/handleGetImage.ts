@@ -10,7 +10,7 @@ export default async function handleGetImage(fileName: string) {
 
   const client = new S3Client(config);
   const getCommand = await new GetObjectCommand({
-    Bucket: "reservio",
+    Bucket: "namthai-learn-s3", // reservio
     Key: fileName,
   });
 
