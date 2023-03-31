@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["clientExtensions"]
 }
 
 datasource db {
@@ -7,74 +8,100 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Discount {
-  id         String   @id
-  created_at DateTime @default(now())
-  updated_at DateTime
+model User {
+  id           String        @id @default(cuid())
+  username     String        @unique
+  firstName    String?
+  lastName     String?
+  password     String
+  email        String?       @unique
+  phoneNo      String?
+  avatar       String
+  status       UserStatus    @default(ACTIVATE)
+  reservations Reservation[]
+  reviews      Review[]
+  vendor       Vendor?
+  admin        Admin?
+
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+
+  @@map(name: "users")
 }
 
-model Product {
-  id             String   @id
-  vendorUsername String
-  images         String[]
-  price          BigInt
-  desc           String
-  created_at     DateTime @default(now())
-  updated_at     DateTime
-  Vendor         Vendor   @relation(fields: [vendorUsername], references: [username])
-  Review         Review[]
-}
-
-model Reservation {
-  id         String   @id
-  userId     String
-  created_at DateTime @default(now())
-  updated_at DateTime
-  users      users    @relation(fields: [userId], references: [id])
-}
-
-model Review {
-  id         String   @id
-  userId     String
-  productId  String
-  rating     Int
-  feedback   String
-  created_at DateTime @default(now())
-  updated_at DateTime
-  Product    Product  @relation(fields: [productId], references: [id])
-  users      users    @relation(fields: [userId], references: [id])
+enum UserStatus {
+  ACTIVATE
+  BANNED
+  DEACTIVATE
 }
 
 model Vendor {
-  id         String       @id
-  username   String       @unique
-  userId     String       @unique
-  created_at DateTime     @default(now())
-  updated_at DateTime
-  desc       String
-  status     VendorStatus
-  Product    Product[]
-  users      users        @relation(fields: [userId], references: [id])
-}
+  id        String       @id @default(cuid())
+  username  String       @unique
+  userId    String       @unique
+  certified Boolean      @default(false)
+  status    VendorStatus @default(PENDING)
+  desc      String
+  user      User         @relation(fields: [userId], references: [id])
+  products  Product[]
 
-model users {
-  id          String        @id
-  username    String        @unique
-  firstName   String?
-  lastName    String?
-  password    String
-  email       String?       @unique
-  phoneNo     String?
-  avatar      String
-  created_at  DateTime      @default(now())
-  updated_at  DateTime
-  Reservation Reservation[]
-  Review      Review[]
-  Vendor      Vendor?
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
 }
 
 enum VendorStatus {
   PENDING
   ACCEPTED
   BANNED
+}
+
+model Admin {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+}
+
+model Reservation {
+  id       String @id @default(cuid())
+  userId   String
+  customer User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+}
+
+model Product {
+  id             String   @id @default(cuid())
+  vendorUsername String
+  vendor         Vendor   @relation(fields: [vendorUsername], references: [username])
+  images         String[]
+  price          BigInt
+  desc           String   @db.Text
+  reviews        Review[]
+
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+}
+
+model Review {
+  id        String  @id @default(uuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  rating    Int
+  feedback  String  @db.Text
+
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+}
+
+model Discount {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
 }
