@@ -73,6 +73,8 @@ export default class ReservioServer {
         res: Response,
         next: NextFunction
       ) => {
+        console.log("Error url: ", req.url);
+
         if (error instanceof CustomError) {
           return res.status(error.statusCode).json({
             error: error.name,
