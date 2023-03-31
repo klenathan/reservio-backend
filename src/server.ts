@@ -52,6 +52,7 @@ export default class ReservioServer {
     let defaultRoute = Router();
     defaultRoute.get("/", (req, res) => {
       return res.json({
+        user: req.body.user,
         title: "RESERVIO's ExpressJS EC2 API",
         version: "v0.1.0",
         documentation: "blank_for_now",
