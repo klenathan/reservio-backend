@@ -77,8 +77,10 @@ model Product {
   id             String   @id @default(cuid())
   vendorUsername String
   vendor         Vendor   @relation(fields: [vendorUsername], references: [username])
+  name           String
   images         String[]
-  price          BigInt
+  address        String
+  price          Int      @db.Integer
   desc           String   @db.Text
   reviews        Review[]
 
@@ -100,7 +102,10 @@ model Review {
 }
 
 model Discount {
-  id String @id @default(cuid())
+  id     String @id @default(cuid())
+  name   String
+  desc   String @default("")
+  amount Int
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")

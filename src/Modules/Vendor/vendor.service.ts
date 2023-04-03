@@ -1,3 +1,4 @@
+import CustomError from "@/Errors/CustomError";
 import { Prisma, PrismaClient } from "@prisma/client";
 import BaseService from "../Base/BaseService";
 import DTORequestVendor from "./types/DTORequestVendor";
@@ -43,6 +44,16 @@ export default class VendorService extends BaseService {
 
   requestNewVendor = async (data: DTORequestVendor) => {
     let username = data.user.username;
+    let vendorCheck = await this.db.vendor.findFirst({
+      where: { username: username },
+    });
+    if (vendorCheck) {
+      throw new CustomError(
+        "VENDOR_EXIST",
+        `Vendor '@${username}' has already exist`,
+        422
+      );
+    }
     return await this.db.vendor.create({
       data: {
         username: data.user.username,

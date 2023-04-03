@@ -1,5 +1,9 @@
 ////// Dependencies
 import { PrismaClient } from "@prisma/client";
+import {
+  PrismaClientKnownRequestError,
+  PrismaClientUnknownRequestError,
+} from "@prisma/client/runtime/library";
 import cors from "cors";
 import express, {
   Application,
@@ -11,12 +15,14 @@ import express, {
 import http, { createServer } from "http";
 import multer from "multer";
 import CustomError from "./Errors/CustomError";
+import ErrorCode from "./Errors/ErrorCode";
 
 ////// Middlewares
 import { JWTValidatorMiddleware } from "./Middlewares/JWTValidatorMiddleware";
 
 ////// Routes
 import AuthRouter from "./Modules/Authentication/auth.routes";
+import ProductRouter from "./Modules/Product/product.routes";
 import UserRouter from "./Modules/Users/user.routes";
 import VendorRouter from "./Modules/Vendor/vendor.routes";
 
@@ -70,6 +76,7 @@ export default class ReservioServer {
     this.instance.use("/auth", new AuthRouter(this.db).router);
     this.instance.use("/user", new UserRouter(this.db).router);
     this.instance.use("/vendor", new VendorRouter(this.db).router);
+    this.instance.use("/service", new ProductRouter(this.db).router);
     this.instance.get("/", defaultRoute);
     this.instance.use("*", (req, res) => {
       res.status(404).json({
@@ -83,12 +90,18 @@ export default class ReservioServer {
   private errorHandling() {
     this.instance.use(
       (
-        error: CustomError | Error,
+        error: CustomError | PrismaClientKnownRequestError | Error,
         req: Request,
         res: Response,
         next: NextFunction
       ) => {
-        if (error instanceof CustomError) {
+        if (error instanceof PrismaClientKnownRequestError) {
+          return res.status(500).json({
+            error: ErrorCode[error.code] as string,
+            message: error.message,
+            code: error.code,
+          });
+        } else if (error instanceof CustomError) {
           return res.status(error.statusCode).json({
             error: error.name,
             message: error.message,

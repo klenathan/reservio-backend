@@ -1,9 +1,9 @@
 import { Prisma, PrismaClient } from "@prisma/client";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { Request, Response, NextFunction } from "express";
 import BaseController from "../Base/BaseController";
 import DTORequestVendor from "./types/DTORequestVendor";
 import VendorService from "./vendor.service";
-
 
 export default class VendorController extends BaseController {
   declare service: VendorService;
