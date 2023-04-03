@@ -60,7 +60,7 @@ export default class ReservioServer {
     defaultRoute.get("/", (req, res) => {
       return res.json({
         title: "RESERVIO's ExpressJS EC2 API",
-        version: "v0.1.0",
+        version: "v0.1.10",
         documentation: "blank_for_now",
         message:
           "You are accessing Reservio's EC2 insctance API. From Reservio team with love 💗.",
