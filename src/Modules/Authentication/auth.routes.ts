@@ -1,3 +1,4 @@
+import { JWTValidatorMiddleware } from "@/Middlewares/JWTValidatorMiddleware";
 import { PrismaClient } from "@prisma/client";
 
 import BaseRouter from "../Base/BaseRouter";
@@ -12,7 +13,7 @@ export default class AuthRouter extends BaseRouter {
     let authController = new AuthController(db);
     this.router.post("/login", authController.login);
     this.router.post("/signup", authController.signup);
-    this.router.post("/token/refresh");
-    this.router.post("/token/validate");
+    this.router.post("/token/refresh", authController.tokenRefresh);
+    // this.router.post("/token/validate", authController.tokenValidate);
   }
 }

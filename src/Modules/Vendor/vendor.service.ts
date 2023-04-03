@@ -40,6 +40,7 @@ export default class VendorService extends BaseService {
       },
     });
   };
+
   requestNewVendor = async (data: DTORequestVendor) => {
     let username = data.user.username;
     return await this.db.vendor.create({
