@@ -1,14 +1,16 @@
 import "module-alias/register";
 import ReservioServer from "./src/server";
 
-console.log("Load .env:");
-console.log(process.env.DATABASE_URL);
-console.log(process.env.JWT_SECRETE);
-console.log(process.env.JWT_REFRESH_TOKEN_SECRETE);
-console.log(process.env.AWS_ACCESS_KEY);
-console.log(process.env.AWS_SECRETE_ACCESS_KEY);
-
-
+console.log("");
+console.log("#".repeat(20) + " Loading .env " + "#".repeat(20));
+console.log("#", process.env.JWT_SECRETE?.substring(0, 3) + "...");
+console.log(
+  "#",
+  process.env.JWT_REFRESH_TOKEN_SECRETE?.substring(0, 3) + "..."
+);
+console.log("#", process.env.AWS_ACCESS_KEY?.substring(0, 3) + "...");
+console.log("#", process.env.AWS_SECRETE_ACCESS_KEY?.substring(0, 3) + "...");
+console.log("#".repeat(40));
 
 const server = new ReservioServer(8080);
 server.start();
