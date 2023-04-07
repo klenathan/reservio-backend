@@ -1,3 +1,4 @@
+import CustomError from "@/Errors/CustomError";
 import UnauthenticatedError from "@/Errors/UnauthenticatedError";
 import { NextFunction, Request, Response } from "express";
 import { sign, verify, VerifyErrors } from "jsonwebtoken";
@@ -8,18 +9,21 @@ export function JWTValidatorMiddleware(
   next: NextFunction
 ) {
   if (!process.env.JWT_SECRETE || !process.env.JWT_REFRESH_TOKEN_SECRETE) {
-    return res.status(500).json({
-      error: "Environment error occurs",
-      message: "Please include JWT Secrete key into ENV config file",
-    });
+    throw new CustomError(
+      "ENV_ERR",
+      "Please include JWT Secrete key into ENV config file",
+      500
+    );
   }
   const jwt_secrete = process.env.JWT_SECRETE;
   let accessToken = req.headers.authorization?.substring(7);
+
   if (!accessToken) {
-    return res.status(422).json({
-      error: "MISSING_AUTHORIZATION_HEADER",
-      message: "Please include JWT token in request header",
-    });
+    throw new CustomError(
+      "MISSING_AUTHORIZATION_HEADER",
+      "Please include JWT token in request header",
+      422
+    );
   }
 
   return verify(
