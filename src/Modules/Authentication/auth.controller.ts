@@ -29,9 +29,12 @@ export default class AuthController extends BaseController {
   };
   signup = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      
+      
       let signUpData: DTOSignUp = req.body;
       let avatar = req.files as unknown as Express.Multer.File[];
-
+      console.log(req.body);
+      console.log(req.files);
       let result = await this.service.handleSignUp(signUpData, avatar[0]);
       return res.json(result);
     } catch (e) {
