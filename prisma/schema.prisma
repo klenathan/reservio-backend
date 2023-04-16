@@ -65,16 +65,23 @@ model Admin {
 }
 
 model Reservation {
-  id         String    @id @default(cuid())
+  id         String            @id @default(cuid())
   userId     String
-  customer   User      @relation(fields: [userId], references: [id])
+  customer   User              @relation(fields: [userId], references: [id])
   discountId String?
-  discount   Discount? @relation(fields: [discountId], references: [id])
+  discount   Discount?         @relation(fields: [discountId], references: [id])
+  status     ReservationStatus @default(PENDING)
   total      Int
 
   createdAt         DateTime            @default(now()) @map(name: "created_at")
   updatedAt         DateTime            @updatedAt @map(name: "updated_at")
   ProuctReservation ProuctReservation[]
+}
+
+enum ReservationStatus {
+  PENDING
+  REJECTED
+  ACCEPTED
 }
 
 model ProuctReservation {
