@@ -65,25 +65,45 @@ model Admin {
 }
 
 model Reservation {
-  id       String @id @default(cuid())
-  userId   String
-  customer User   @relation(fields: [userId], references: [id])
+  id         String    @id @default(cuid())
+  userId     String
+  customer   User      @relation(fields: [userId], references: [id])
+  discountId String?
+  discount   Discount? @relation(fields: [discountId], references: [id])
+  total      Int
+
+  createdAt         DateTime            @default(now()) @map(name: "created_at")
+  updatedAt         DateTime            @updatedAt @map(name: "updated_at")
+  ProuctReservation ProuctReservation[]
+}
+
+model ProuctReservation {
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id])
+  reservationId String
+  reservation   Reservation @relation(fields: [reservationId], references: [id])
+  quantity      Int
+  startAt       DateTime    @default(now())
+  endAt         DateTime?
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
+
+  @@id([productId, reservationId])
 }
 
 model Product {
-  id             String   @id @default(cuid())
+  id             String              @id @default(cuid())
   vendorUsername String
-  category       Category @default(Hospitality)
-  vendor         Vendor   @relation(fields: [vendorUsername], references: [username])
+  category       Category            @default(Hospitality)
+  vendor         Vendor              @relation(fields: [vendorUsername], references: [username])
   name           String
   images         String[]
   address        String
-  price          Int      @db.Integer
-  desc           String   @db.Text
+  price          Int                 @db.Integer
+  desc           String              @db.Text
   reviews        Review[]
+  reservation    ProuctReservation[]
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
@@ -103,10 +123,11 @@ model Review {
 }
 
 model Discount {
-  id     String @id @default(cuid())
-  name   String
-  desc   String @default("")
-  amount Int
+  id          String        @id @default(cuid())
+  name        String
+  desc        String        @default("")
+  amount      Int
+  reservation Reservation[]
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
