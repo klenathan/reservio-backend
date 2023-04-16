@@ -14,6 +14,5 @@ export default class AuthRouter extends BaseRouter {
     this.router.post("/login", authController.login);
     this.router.post("/signup", authController.signup);
     this.router.post("/token/refresh", authController.tokenRefresh);
-    // this.router.post("/token/validate", authController.tokenValidate);
   }
 }

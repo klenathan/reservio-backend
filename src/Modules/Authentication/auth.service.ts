@@ -1,14 +1,15 @@
+import { Prisma, PrismaClient } from "@prisma/client";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { randomUUID } from "crypto";
+
 import CustomError from "@/Errors/CustomError";
 import UnauthenticatedError from "@/Errors/UnauthenticatedError";
 import generateTokenPair from "@/Utils/generateTokenPair";
 import handleImageUpload from "@/Utils/HandleImages/handleImgUpload";
-import { Prisma, PrismaClient } from "@prisma/client";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-
-import { randomUUID } from "crypto";
 import BaseService from "../Base/BaseService";
 import DTOSignUp from "./Types/DTOSignUp";
 import { comparePassword, hashPassword } from "./Utils/passwordUtils";
+
 export default class AuthService extends BaseService {
   public constructor(db: PrismaClient) {
     super(db);

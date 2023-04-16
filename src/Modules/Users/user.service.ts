@@ -21,6 +21,7 @@ export default class UserService extends BaseService {
     createdAt: true,
     updatedAt: true,
   };
+  
   constructor(db: PrismaClient) {
     super(db);
   }

@@ -1,6 +1,6 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["clientExtensions"]
+  previewFeatures = ["clientExtensions", "fullTextSearch"]
 }
 
 datasource db {
@@ -76,6 +76,7 @@ model Reservation {
 model Product {
   id             String   @id @default(cuid())
   vendorUsername String
+  category       Category @default(Hospitality)
   vendor         Vendor   @relation(fields: [vendorUsername], references: [username])
   name           String
   images         String[]
@@ -109,4 +110,16 @@ model Discount {
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
+}
+
+enum Category {
+  Healthcare
+  Transportation
+  Legal
+  Financial
+  Education
+  Maintenance_N_repair
+  F_N_B
+  Retail
+  Hospitality
 }

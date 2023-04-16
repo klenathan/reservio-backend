@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node ./index.ts",
+    "start": "npx prisma generate && ts-node ./index.ts",
     "start:dev": "tsnd --respawn --exit-child --watch src ./index.ts",
     "build": "rimraf ./build && tsc"
   },
