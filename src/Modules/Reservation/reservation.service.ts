@@ -47,4 +47,44 @@ export default class ReservationService extends BaseService {
     });
     return result;
   };
+
+  acceptReservation = async (reservationId: string) => {
+    let reservation = await this.db.reservation.update({
+      where: {
+        id: reservationId,
+      },
+      data: {
+        status: "ACCEPTED",
+      },
+      include: {
+        customer: {
+          select: this.userQuerySelectConfig,
+        },
+        ProuctReservation: {
+          include: { product: true },
+        },
+      },
+    });
+    return reservation;
+  };
+
+  rejectReservation = async (reservationId: string) => {
+    let reservation = await this.db.reservation.update({
+      where: {
+        id: reservationId,
+      },
+      data: {
+        status: "REJECTED",
+      },
+      include: {
+        customer: {
+          select: this.userQuerySelectConfig,
+        },
+        ProuctReservation: {
+          include: { product: true },
+        },
+      },
+    });
+    return reservation;
+  };
 }
