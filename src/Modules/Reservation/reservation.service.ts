@@ -33,6 +33,7 @@ export default class ReservationService extends BaseService {
 
     let result = await this.db.reservation.create({
       data: {
+        vendor: { connect: { username: "pvdong" } },
         customer: { connect: { username: data.user.username } },
         total: 1000,
         ProuctReservation: {
