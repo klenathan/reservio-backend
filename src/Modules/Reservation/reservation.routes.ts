@@ -19,5 +19,6 @@ export default class ReservationRouter extends BaseRouter {
       JWTValidatorMiddleware,
       controller.rejectReservation
     );
+    this.router.delete("/", controller.deleteAllReservation);
   }
 }

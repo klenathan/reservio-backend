@@ -25,6 +25,7 @@ model User {
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
+  Cart      Cart[]
 
   @@map(name: "users")
 }
@@ -48,6 +49,7 @@ model Vendor {
   createdAt   DateTime      @default(now()) @map(name: "created_at")
   updatedAt   DateTime      @updatedAt @map(name: "updated_at")
   Reservation Reservation[]
+  Cart        Cart[]
 }
 
 enum VendorStatus {
@@ -63,6 +65,18 @@ model Admin {
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
+}
+
+model Cart {
+  username  String
+  user      User    @relation(fields: [username], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  Vendor    Vendor? @relation(fields: [vendorId], references: [id])
+  vendorId  String?
+
+  @@id([username, productId])
 }
 
 model Reservation {
@@ -117,6 +131,7 @@ model Product {
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
+  Cart      Cart[]
 }
 
 model Review {

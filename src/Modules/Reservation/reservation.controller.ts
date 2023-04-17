@@ -50,7 +50,7 @@ export default class ReservationController extends BaseController {
         await this.service.updateReservationStatus(req.params.id, "ACCEPTED")
       );
     } catch (e) {
-      next(e); 
+      next(e);
     }
   };
 
@@ -63,6 +63,18 @@ export default class ReservationController extends BaseController {
       return res.send(
         await this.service.updateReservationStatus(req.params.id, "REJECTED")
       );
+    } catch (e) {
+      next(e);
+    }
+  };
+
+  deleteAllReservation = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      return res.send(await this.service.removeAllReservation());
     } catch (e) {
       next(e);
     }

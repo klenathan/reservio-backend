@@ -1,5 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import BaseService from "../Base/BaseService";
+import DTOAddToCart from "./DTOs/DTOAddToCart";
+import DTONewReservation from "./DTOs/DTONewReservation";
 
 export default class ReservationService extends BaseService {
   private userQuerySelectConfig = {
@@ -22,7 +24,7 @@ export default class ReservationService extends BaseService {
     return await this.db.reservation.findMany();
   };
 
-  newReservation = async (data: any) => {
+  newReservation = async (data: DTONewReservation) => {
     let products = data.products.map((p: any) => {
       return {
         product: { connect: { id: p.productId } },
@@ -31,7 +33,7 @@ export default class ReservationService extends BaseService {
       };
     });
 
-    let result = await this.db.reservation.create({
+    return await this.db.reservation.create({
       data: {
         vendor: { connect: { username: "pvdong" } },
         customer: { connect: { username: data.user.username } },
@@ -49,7 +51,6 @@ export default class ReservationService extends BaseService {
         },
       },
     });
-    return result;
   };
 
   updateReservationStatus = async (
@@ -73,5 +74,29 @@ export default class ReservationService extends BaseService {
       },
     });
     return reservation;
+  };
+
+  removeAllReservation = async () => {
+    let result = this.db.product.groupBy({
+      by: ["vendorUsername"],
+      where: {
+        id: {
+          in: ["clgki7tvo0006xnodn0ana1ub"],
+        },
+      },
+    });
+    return result;
+    // return { message: "DO NOT ACCESS" };
+  };
+
+  addToCart = async (data: DTOAddToCart) => {
+    let result = this.db.cart.create({
+      data: {
+        user: { connect: { username: data.user.username } },
+        product: { connect: { id: data.productID } },
+        quantity: data.quantity,
+      },
+    });
+    return result;
   };
 }
