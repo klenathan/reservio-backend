@@ -25,15 +25,50 @@ export default class SeachService extends BaseService {
 
     const userResult = await this.db.vendor.findMany({
       where: {
-        username: {
-          contains: query,
-          mode: "insensitive",
-        },
+        OR: [
+          {
+            username: {
+              search: query,
+              mode: "insensitive",
+            },
+          },
+          {
+            username: {
+              contains: query,
+              mode: "insensitive",
+            },
+          },
+          {
+            desc: {
+              search: query,
+              mode: "insensitive",
+            },
+          },
+          {
+            desc: {
+              contains: query,
+              mode: "insensitive",
+            },
+          },
+        ],
       },
     });
+
     const productResult = await this.db.product.findMany({
       where: {
         OR: [
+          {
+            name: {
+              search: query,
+              mode: "insensitive",
+            },
+          },
+          {
+            desc: {
+              search: query,
+              mode: "insensitive",
+            },
+          },
           {
             name: {
               contains: query,
@@ -49,8 +84,9 @@ export default class SeachService extends BaseService {
         ],
       },
     });
+
     const result = {
-      vendorResult: userResult,
+      vendors: userResult,
       products: productResult,
     };
     return result;
