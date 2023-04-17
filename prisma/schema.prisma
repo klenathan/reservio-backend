@@ -26,6 +26,7 @@ model User {
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
   Cart      Cart[]
+  Ledger    Ledger[]
 
   @@map(name: "users")
 }
@@ -45,6 +46,7 @@ model Vendor {
   desc      String
   user      User         @relation(fields: [userId], references: [id])
   products  Product[]
+  category  Category[]   @default([Hospitality])
 
   createdAt   DateTime      @default(now()) @map(name: "created_at")
   updatedAt   DateTime      @updatedAt @map(name: "updated_at")
@@ -77,6 +79,15 @@ model Cart {
   vendorId  String?
 
   @@id([username, productId])
+}
+
+model Ledger {
+  id        String   @id @default(cuid())
+  timestamp DateTime @default(now())
+  path      String
+  username  String
+  user      User     @relation(fields: [username], references: [id])
+  category  Category
 }
 
 model Reservation {

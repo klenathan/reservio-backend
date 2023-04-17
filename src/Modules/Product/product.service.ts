@@ -23,10 +23,20 @@ export default class ProductService extends BaseService {
   };
 
   getSingleProduct = async (id: string) => {
-    return await this.db.product.findFirstOrThrow({
+    
+    let result = await this.db.product.findFirstOrThrow({
       where: { id: id },
-      include: { reviews: true },
+      include: {
+        reviews: true,
+        _count: {
+          select: {
+            reviews: true,
+            reservation: true,
+          },
+        },
+      },
     });
+    return result;
   };
 
   createProduct = async (

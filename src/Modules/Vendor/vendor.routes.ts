@@ -1,3 +1,4 @@
+import { JWTCheckMiddleware } from "@/Middlewares/JWTCheckMiddleware";
 import { JWTValidatorMiddleware } from "@/Middlewares/JWTValidatorMiddleware";
 import { PrismaClient } from "@prisma/client";
 
@@ -11,8 +12,16 @@ export default class VendorRouter extends BaseRouter {
     let vendorController = new VendorController(db);
 
     this.router.get("/", vendorController.getAllVendor);
-    this.router.post("/", JWTValidatorMiddleware, vendorController.requestNewVendor)
-    this.router.get("/:id", vendorController.getVendorByUsername);
+    this.router.post(
+      "/",
+      JWTValidatorMiddleware,
+      vendorController.requestNewVendor
+    );
+    this.router.get(
+      "/:id",
+      JWTCheckMiddleware,
+      vendorController.getVendorByUsername
+    );
     this.router.patch("/:id");
     this.router.delete("/:id");
   }
