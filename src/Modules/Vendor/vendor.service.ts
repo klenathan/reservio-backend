@@ -18,6 +18,7 @@ export default class VendorService extends BaseService {
       updatedAt: true,
     },
   };
+  
   constructor(db: PrismaClient) {
     super(db);
   }

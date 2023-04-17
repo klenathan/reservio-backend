@@ -23,17 +23,20 @@ export default class ReservationService extends BaseService {
   };
 
   newReservation = async (data: any) => {
+    let products = data.products.map((p: any) => {
+      return {
+        product: { connect: { id: p.productId } },
+        quantity: parseInt(p.quantity),
+        startAt: new Date(p.startAt),
+      };
+    });
+
     let result = await this.db.reservation.create({
       data: {
         customer: { connect: { username: data.user.username } },
         total: 1000,
         ProuctReservation: {
-          create: [
-            {
-              product: { connect: { id: data.productId } },
-              quantity: parseInt(data.quantity),
-            },
-          ],
+          create: products,
         },
       },
       include: {
@@ -48,33 +51,16 @@ export default class ReservationService extends BaseService {
     return result;
   };
 
-  acceptReservation = async (reservationId: string) => {
+  updateReservationStatus = async (
+    reservationId: string,
+    status: "PENDING" | "REJECTED" | "ACCEPTED"
+  ) => {
     let reservation = await this.db.reservation.update({
       where: {
         id: reservationId,
       },
       data: {
-        status: "ACCEPTED",
-      },
-      include: {
-        customer: {
-          select: this.userQuerySelectConfig,
-        },
-        ProuctReservation: {
-          include: { product: true },
-        },
-      },
-    });
-    return reservation;
-  };
-
-  rejectReservation = async (reservationId: string) => {
-    let reservation = await this.db.reservation.update({
-      where: {
-        id: reservationId,
-      },
-      data: {
-        status: "REJECTED",
+        status: status,
       },
       include: {
         customer: {

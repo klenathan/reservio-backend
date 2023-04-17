@@ -45,8 +45,9 @@ model Vendor {
   user      User         @relation(fields: [userId], references: [id])
   products  Product[]
 
-  createdAt DateTime @default(now()) @map(name: "created_at")
-  updatedAt DateTime @updatedAt @map(name: "updated_at")
+  createdAt   DateTime      @default(now()) @map(name: "created_at")
+  updatedAt   DateTime      @updatedAt @map(name: "updated_at")
+  Reservation Reservation[]
 }
 
 enum VendorStatus {
@@ -68,6 +69,8 @@ model Reservation {
   id         String            @id @default(cuid())
   userId     String
   customer   User              @relation(fields: [userId], references: [id])
+  vendorId   String
+  vendor     Vendor            @relation(fields: [vendorId], references: [id])
   discountId String?
   discount   Discount?         @relation(fields: [discountId], references: [id])
   status     ReservationStatus @default(PENDING)

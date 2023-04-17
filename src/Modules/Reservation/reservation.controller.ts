@@ -27,7 +27,7 @@ export default class ReservationController extends BaseController {
 
   newReservation = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!(req.body.user && req.body.productId && req.body.quantity)) {
+      if (!(req.body.user && req.body.products)) {
         throw new CustomError(
           "INVALID_REQUEST",
           "Missing arguements from request",
@@ -35,6 +35,34 @@ export default class ReservationController extends BaseController {
         );
       }
       return res.send(await this.service.newReservation(req.body));
+    } catch (e) {
+      next(e);
+    }
+  };
+
+  acceptReservation = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      return res.send(
+        await this.service.updateReservationStatus(req.params.id, "ACCEPTED")
+      );
+    } catch (e) {
+      next(e); 
+    }
+  };
+
+  rejectReservation = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      return res.send(
+        await this.service.updateReservationStatus(req.params.id, "REJECTED")
+      );
     } catch (e) {
       next(e);
     }

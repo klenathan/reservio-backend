@@ -9,5 +9,15 @@ export default class ReservationRouter extends BaseRouter {
     let controller = new ReservationController(db);
     this.router.get("/", controller.getAllReservation);
     this.router.post("/", JWTValidatorMiddleware, controller.newReservation);
+    this.router.put(
+      "/accept/:id",
+      JWTValidatorMiddleware,
+      controller.acceptReservation
+    );
+    this.router.put(
+      "/reject/:id",
+      JWTValidatorMiddleware,
+      controller.rejectReservation
+    );
   }
 }
