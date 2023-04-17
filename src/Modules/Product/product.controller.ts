@@ -21,6 +21,18 @@ export default class ProductController extends BaseController {
     }
   };
 
+  getSingleProduct = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      return res.send(await this.service.getSingleProduct(req.params.id));
+    } catch (e) {
+      next(e);
+    }
+  };
+
   newProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
       let data = req.body;

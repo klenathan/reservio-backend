@@ -12,7 +12,7 @@ export default class ProductService extends BaseService {
     return await this.db.product.findMany({ include: { reviews: true } });
   };
 
-  getOneProduct = async (id: string) => {
+  getSingleProduct = async (id: string) => {
     return await this.db.product.findFirstOrThrow({
       where: { id: id },
       include: { reviews: true },
