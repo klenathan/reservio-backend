@@ -9,7 +9,7 @@ export default class ProductService extends BaseService {
   }
 
   getAllProduct = async () => {
-    return await this.db.product.findMany();
+    return await this.db.product.findMany({ include: { reviews: true } });
   };
 
   getOneProduct = async (id: string) => {

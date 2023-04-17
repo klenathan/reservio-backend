@@ -20,8 +20,8 @@ export default class SeachService extends BaseService {
     //   `%${keyword[0]}%`
     // );
 
-    const kw_joined = keyword.join(" | ");
-    console.log(kw_joined);
+    // const kw_joined = keyword.join(" | ");
+    // console.log(kw_joined);
 
     const userResult = await this.db.vendor.findMany({
       where: {

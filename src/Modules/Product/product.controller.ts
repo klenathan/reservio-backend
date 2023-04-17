@@ -13,6 +13,14 @@ export default class ProductController extends BaseController {
     this.service = new ProductService(db);
   }
 
+  getAllProduct = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      return res.send(await this.service.getAllProduct());
+    } catch (e) {
+      next(e);
+    }
+  };
+
   newProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
       let data = req.body;
