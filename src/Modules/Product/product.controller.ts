@@ -1,10 +1,22 @@
 import CustomError from "@/Errors/CustomError";
-import { PrismaClient } from "@prisma/client";
+import { Category, Prisma, PrismaClient } from "@prisma/client";
 import { Request, Response, NextFunction } from "express";
 
 /// controller
 import BaseController from "../Base/BaseController";
 import ProductService from "./product.service";
+
+const categories = [
+  "Healthcare",
+  "Transportation",
+  "Legal",
+  "Financial",
+  "Education",
+  "Maintenance_N_repair",
+  "F_N_B",
+  "Retail",
+  "Hospitality",
+];
 
 export default class ProductController extends BaseController {
   declare service: ProductService;
@@ -28,6 +40,24 @@ export default class ProductController extends BaseController {
   ) => {
     try {
       return res.send(await this.service.getSingleProduct(req.params.id));
+    } catch (e) {
+      next(e);
+    }
+  };
+
+  getByCategory = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const category = req.params.category;
+      if (!categories.includes(category)) {
+        throw new CustomError(
+          "INVALID_CATEGORY",
+          `Category '${category}' not found`,
+          404
+        );
+      }
+      return res.send(
+        await this.service.getByCategory(category as Prisma.EnumCategoryFilter)
+      );
     } catch (e) {
       next(e);
     }

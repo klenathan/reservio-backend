@@ -54,6 +54,22 @@ export default class ProductService extends BaseService {
     return;
   };
 
+  getByCategory = async (category: Prisma.EnumCategoryFilter) => {
+    let result = this.db.product.findMany({
+      where: { category: category },
+      include: {
+        reviews: true,
+        _count: {
+          select: {
+            reviews: true,
+            reservation: true,
+          },
+        },
+      },
+    });
+    return result;
+  };
+
   createProduct = async (
     data: Prisma.ProductCreateManyInput,
     images: Express.Multer.File[]
