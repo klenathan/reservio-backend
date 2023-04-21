@@ -138,6 +138,7 @@ model Product {
   price          Int                 @db.Integer
   desc           String              @db.Text
   reviews        Review[]
+  avgReview      Float               @default(0)
   reservation    ProuctReservation[]
 
   createdAt DateTime @default(now()) @map(name: "created_at")

@@ -23,11 +23,12 @@ export default class ProductService extends BaseService {
   };
 
   getSingleProduct = async (id: string) => {
-    
-    let result = await this.db.product.findFirstOrThrow({
+    let product = await this.db.product.findFirstOrThrow({
       where: { id: id },
       include: {
-        reviews: true,
+        reviews: {
+          include: { user: true },
+        },
         _count: {
           select: {
             reviews: true,
@@ -36,7 +37,21 @@ export default class ProductService extends BaseService {
         },
       },
     });
+    let avg = 0;
+    if (product._count.reviews != 0) {
+      let sum = 0;
+      product.reviews.forEach((review) => {
+        sum += review.rating;
+      });
+      avg = sum / product._count.reviews;
+    }
+
+    let result = { avgRating: avg, ...product };
     return result;
+  };
+
+  calculateReviews = async () => {
+    return;
   };
 
   createProduct = async (

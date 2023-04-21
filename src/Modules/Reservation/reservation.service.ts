@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import BaseService from "../Base/BaseService";
-import DTOAddToCart from "./DTOs/DTOAddToCart";
-import DTONewReservation from "./DTOs/DTONewReservation";
+import DTOAddToCart from "./types/DTOAddToCart";
+import DTONewReservation from "./types/DTONewReservation";
 
 export default class ReservationService extends BaseService {
   private userQuerySelectConfig = {
