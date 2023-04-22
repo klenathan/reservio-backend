@@ -10,6 +10,7 @@ import handleImageUpload from "@/Utils/HandleImages/handleImgUpload";
 import BaseService from "../Base/BaseService";
 import DTOSignUp from "./Types/DTOSignUp";
 import { comparePassword, hashPassword } from "./Utils/passwordUtils";
+import sendEmail from "@/Utils/sendEmail";
 
 export default class AuthService extends BaseService {
   public constructor(db: PrismaClient) {
@@ -31,8 +32,6 @@ export default class AuthService extends BaseService {
     let { password: _, ...returnData } = user;
 
     const [accessToken, refreshToken] = generateTokenPair(returnData);
-    
-    // await this.sendEmail("rmit.clubapp@gmail.com");
 
     return {
       status: "success",
@@ -42,31 +41,18 @@ export default class AuthService extends BaseService {
     };
   };
 
-  sendEmail = async (email: string) => {
-    const sesClient = new SESClient({ region: "ap-southeast-1" });
-    const paramsForEmail = {
-      Destination: {
-        ToAddresses: [email],
-      },
-      Message: {
-        Body: {
-          Html: {
-            Charset: "UTF-8",
-            Data: `
-                    <p>              
-                      Hello world!
-                    </p>
-                    `,
-          },
-        },
-        Subject: { Data: "Hello World" },
-      },
-      Source: "rmit.clubapp@gmail.com",
-    };
-    const resultEmail = await sesClient.send(
-      new SendEmailCommand(paramsForEmail)
-    );
-    sesClient.destroy();
+  generateCode = () => {
+    const length = 6;
+    let result = "";
+    const characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      counter += 1;
+    }
+    return result;
   };
 
   handleSignUp = async (
@@ -83,6 +69,9 @@ export default class AuthService extends BaseService {
 
     data.password = await hashPassword(data.password);
 
+    const generatedCode = this.generateCode();
+
+    /// Create on database
     let newUser = await this.db.user
       .create({
         data: {
@@ -92,6 +81,7 @@ export default class AuthService extends BaseService {
           email: data.email || "",
           phoneNo: data.phone || "",
           avatar: data.avatar,
+          confirmationCode: { create: { confirmCode: generatedCode } },
         } as Prisma.UserCreateInput,
       })
       .then(async (r) => {
@@ -111,6 +101,8 @@ export default class AuthService extends BaseService {
         throw e;
       });
 
+    /// Send E-mail
+    await sendEmail("rmit.clubapp@gmail.com", generatedCode);
     const { id: _id, password: _pw, ...returnData } = newUser;
     return returnData;
   };
