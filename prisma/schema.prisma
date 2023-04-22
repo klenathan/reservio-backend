@@ -1,6 +1,7 @@
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["clientExtensions", "fullTextSearch"]
+  binaryTargets   = env("PRISMA_CLI_BINARY_TARGETS")
 }
 
 datasource db {

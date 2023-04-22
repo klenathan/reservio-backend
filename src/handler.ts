@@ -1,5 +1,5 @@
 import "module-alias/register";
-import ReservioServer from "./src/server";
+import ReservioServer from "./server";
 import ServerlessHttp from "serverless-http";
 
 console.log("");
