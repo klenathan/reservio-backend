@@ -23,12 +23,20 @@ model User {
   vendor       Vendor?
   admin        Admin?
 
-  createdAt DateTime @default(now()) @map(name: "created_at")
-  updatedAt DateTime @updatedAt @map(name: "updated_at")
-  Cart      Cart[]
-  Ledger    Ledger[]
+  createdAt        DateTime          @default(now()) @map(name: "created_at")
+  updatedAt        DateTime          @updatedAt @map(name: "updated_at")
+  Cart             Cart[]
+  Ledger           Ledger[]
+  confirmationCode confirmationCode?
 
   @@map(name: "users")
+}
+
+model confirmationCode {
+  id          String @id @default(uuid())
+  user        User   @relation(fields: [username], references: [username])
+  username    String @unique
+  confirmCode String
 }
 
 enum UserStatus {

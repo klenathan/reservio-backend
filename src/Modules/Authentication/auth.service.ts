@@ -1,6 +1,7 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { randomUUID } from "crypto";
+import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
 import CustomError from "@/Errors/CustomError";
 import UnauthenticatedError from "@/Errors/UnauthenticatedError";
@@ -30,6 +31,8 @@ export default class AuthService extends BaseService {
     let { password: _, ...returnData } = user;
 
     const [accessToken, refreshToken] = generateTokenPair(returnData);
+    
+    // await this.sendEmail("rmit.clubapp@gmail.com");
 
     return {
       status: "success",
@@ -37,6 +40,33 @@ export default class AuthService extends BaseService {
       accessToken: accessToken,
       refreshToken: refreshToken,
     };
+  };
+
+  sendEmail = async (email: string) => {
+    const sesClient = new SESClient({ region: "ap-southeast-1" });
+    const paramsForEmail = {
+      Destination: {
+        ToAddresses: [email],
+      },
+      Message: {
+        Body: {
+          Html: {
+            Charset: "UTF-8",
+            Data: `
+                    <p>              
+                      Hello world!
+                    </p>
+                    `,
+          },
+        },
+        Subject: { Data: "Hello World" },
+      },
+      Source: "rmit.clubapp@gmail.com",
+    };
+    const resultEmail = await sesClient.send(
+      new SendEmailCommand(paramsForEmail)
+    );
+    sesClient.destroy();
   };
 
   handleSignUp = async (
