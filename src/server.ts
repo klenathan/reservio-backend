@@ -50,12 +50,13 @@ export default class ReservioServer {
   }
 
  
-
-  public start() {
-    // this.httpServer.listen(this.PORT, () => {
-    //   console.info("Server started on: " + this.PORT);
-    // });
+  public getInstance() {
     return this.instance;
+  }
+  public start() {
+    this.httpServer.listen(this.PORT, () => {
+      console.info("Server started on: " + this.PORT);
+    });
   }
 
   private middleware() {
@@ -73,7 +74,7 @@ export default class ReservioServer {
     let defaultRoute = Router();
     defaultRoute.get("/", (req, res) => {
       return res.json({
-        title: "RESERVIO's ExpressJS EC2 API",
+        title: "RESERVIO's ExpressJS Lambda API",
         version: "v0.1.10",
         documentation: "blank_for_now",
         message:
