@@ -17,6 +17,7 @@ import multer from "multer";
 import CustomError from "./Errors/CustomError";
 import ErrorCode from "./Errors/ErrorCode";
 
+
 ////// Middlewares
 import { JWTValidatorMiddleware } from "./Middlewares/JWTValidatorMiddleware";
 
@@ -33,8 +34,9 @@ export default class ReservioServer {
   public instance: Application;
   public PORT: number;
   public options: any;
-  private httpServer: http.Server;
+  // private httpServer: http.Server;
   private db: PrismaClient;
+  httpServer: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse>;
 
   public constructor(PORT: number) {
     this.instance = express();
@@ -47,10 +49,13 @@ export default class ReservioServer {
     this.errorHandling();
   }
 
+ 
+
   public start() {
-    this.httpServer.listen(this.PORT, () => {
-      console.info("Server started on: " + this.PORT);
-    });
+    // this.httpServer.listen(this.PORT, () => {
+    //   console.info("Server started on: " + this.PORT);
+    // });
+    return this.instance;
   }
 
   private middleware() {
