@@ -11,6 +11,8 @@ import BaseService from "../Base/BaseService";
 import DTOSignUp from "./Types/DTOSignUp";
 import { comparePassword, hashPassword } from "./Utils/passwordUtils";
 import sendEmail from "@/Utils/sendEmail";
+import generateCode from "@/Utils/generateConfirmationString";
+import confirmationEmailTemplate from "@/Utils/emailTemplates/confirmationEmailTemplate";
 
 export default class AuthService extends BaseService {
   public constructor(db: PrismaClient) {
@@ -41,20 +43,6 @@ export default class AuthService extends BaseService {
     };
   };
 
-  generateCode = () => {
-    const length = 6;
-    let result = "";
-    const characters =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    const charactersLength = characters.length;
-    let counter = 0;
-    while (counter < length) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-      counter += 1;
-    }
-    return result;
-  };
-
   handleSignUp = async (
     data: DTOSignUp,
     avatar: Express.Multer.File | undefined
@@ -69,7 +57,7 @@ export default class AuthService extends BaseService {
 
     data.password = await hashPassword(data.password);
 
-    const generatedCode = this.generateCode();
+    const generatedCode = generateCode();
 
     /// Create on database
     let newUser = await this.db.user
@@ -102,8 +90,31 @@ export default class AuthService extends BaseService {
       });
 
     /// Send E-mail
-    await sendEmail("rmit.clubapp@gmail.com", generatedCode);
+    await sendEmail(
+      `[Account Confirmation] ${data.username}`,
+      confirmationEmailTemplate(data.username, generatedCode),
+      "rmit.clubapp@gmail.com"
+    );
     const { id: _id, password: _pw, ...returnData } = newUser;
     return returnData;
+  };
+
+  validateConfirmation = async (username: string, code: string) => {
+    let confirmation = await this.db.confirmationCode.findFirstOrThrow({
+      where: { username: username },
+    });
+
+    if (confirmation.confirmCode == code) {
+      await this.db.user.update({
+        where: { username: username },
+        data: { status: "ACTIVATE" },
+      });
+    }
+
+    return {
+      username: username,
+      code: code,
+      status: confirmation.confirmCode == code,
+    };
   };
 }

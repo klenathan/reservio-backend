@@ -17,7 +17,6 @@ import multer from "multer";
 import CustomError from "./Errors/CustomError";
 import ErrorCode from "./Errors/ErrorCode";
 
-
 ////// Middlewares
 import { JWTValidatorMiddleware } from "./Middlewares/JWTValidatorMiddleware";
 
@@ -36,7 +35,10 @@ export default class ReservioServer {
   public options: any;
   // private httpServer: http.Server;
   private db: PrismaClient;
-  httpServer: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse>;
+  httpServer: http.Server<
+    typeof http.IncomingMessage,
+    typeof http.ServerResponse
+  >;
 
   public constructor(PORT: number) {
     this.instance = express();
@@ -49,14 +51,14 @@ export default class ReservioServer {
     this.errorHandling();
   }
 
- 
-  public getInstance() {
-    return this.instance;
-  }
   public start() {
     this.httpServer.listen(this.PORT, () => {
       console.info("Server started on: " + this.PORT);
     });
+  }
+
+  public getInstance() {
+    return this.instance;
   }
 
   private middleware() {
@@ -74,11 +76,11 @@ export default class ReservioServer {
     let defaultRoute = Router();
     defaultRoute.get("/", (req, res) => {
       return res.json({
-        title: "RESERVIO's ExpressJS Lambda API",
+        title: "RESERVIO's ExpressJS API",
         version: "v0.1.10",
         documentation: "blank_for_now",
         message:
-          "You are accessing Reservio's EC2 insctance API. From Reservio team with love 💗.",
+          "You are accessing Reservio's API. From Reservio team with love 💗.",
       });
     });
     // JWTValidatorMiddleware

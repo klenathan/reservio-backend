@@ -38,7 +38,7 @@ export default async function handleUploadMultipleImage(
       throw new CustomError(err.name, err.message, 400);
     }
   }
-  console.log("result", result);
+  // console.log("result", result);
 
   return result;
 }

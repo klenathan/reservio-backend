@@ -8,6 +8,7 @@ import BaseController from "../Base/BaseController";
 
 import AuthService from "./auth.service";
 import DTOSignUp from "./Types/DTOSignUp";
+import { log } from "console";
 
 export default class AuthController extends BaseController {
   declare service: AuthService;
@@ -29,12 +30,8 @@ export default class AuthController extends BaseController {
   };
   signup = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      
-      
       let signUpData: DTOSignUp = req.body;
       let avatar = req.files as unknown as Express.Multer.File[];
-      console.log(req.body);
-      console.log(req.files);
       let result = await this.service.handleSignUp(signUpData, avatar[0]);
       return res.json(result);
     } catch (e) {
@@ -62,7 +59,25 @@ export default class AuthController extends BaseController {
     }
   };
 
-  // @deprecate
+  validateConfirmation = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const username: string = req.body.username;
+      const confirmationCode: string = req.body.code;
+
+      console.log(username, confirmationCode);
+
+      return res.send(
+        await this.service.validateConfirmation(username, confirmationCode)
+      );
+    } catch (e) {
+      next(e);
+    }
+  };
+
   tokenValidate = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.headers.authorization) {

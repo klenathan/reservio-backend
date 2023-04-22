@@ -1,12 +1,10 @@
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
-const confirmationEmail = `
-<p>              
-  Hello world!
-</p>
-`;
-
-export default async function sendEmail(email: string, code: string) {
+export default async function sendEmail(
+  subject: string,
+  data: string,
+  email: string
+) {
   const sesClient = new SESClient({ region: "ap-southeast-1" });
   const paramsForEmail = {
     Destination: {
@@ -16,19 +14,13 @@ export default async function sendEmail(email: string, code: string) {
       Body: {
         Html: {
           Charset: "UTF-8",
-          Data: `
-                    <p>              
-                      Your code is ${code}
-                    </p>
-                    `,
+          Data: data,
         },
       },
-      Subject: { Data: "Hello World" },
+      Subject: { Data: subject },
     },
     Source: "rmit.clubapp@gmail.com",
   };
-  const resultEmail = await sesClient.send(
-    new SendEmailCommand(paramsForEmail)
-  );
+  await sesClient.send(new SendEmailCommand(paramsForEmail));
   sesClient.destroy();
 }

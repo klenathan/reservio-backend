@@ -18,7 +18,7 @@ model User {
   email        String?       @unique
   phoneNo      String?
   avatar       String
-  status       UserStatus    @default(ACTIVATE)
+  status       UserStatus    @default(PENDING)
   reservations Reservation[]
   reviews      Review[]
   vendor       Vendor?
@@ -41,6 +41,7 @@ model confirmationCode {
 }
 
 enum UserStatus {
+  PENDING
   ACTIVATE
   BANNED
   DEACTIVATE
