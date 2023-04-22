@@ -50,12 +50,13 @@ export default class ReservioServer {
   }
 
  
-
-  public start() {
-    // this.httpServer.listen(this.PORT, () => {
-    //   console.info("Server started on: " + this.PORT);
-    // });
+  public getInstance() {
     return this.instance;
+  }
+  public start() {
+    this.httpServer.listen(this.PORT, () => {
+      console.info("Server started on: " + this.PORT);
+    });
   }
 
   private middleware() {

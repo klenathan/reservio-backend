@@ -15,4 +15,8 @@ console.log("#".repeat(40));
 
 const server = new ReservioServer(8080);
 
-module.exports.handler = ServerlessHttp(server.start());
+if (process.env.STAGE == "dev") {
+  server.start();
+} else {
+  module.exports.handler = ServerlessHttp(server.getInstance());
+}
