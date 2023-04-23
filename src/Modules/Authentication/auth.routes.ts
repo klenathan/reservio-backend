@@ -11,6 +11,7 @@ export default class AuthRouter extends BaseRouter {
     super(db);
 
     let authController = new AuthController(db);
+    this.router.get("/migration", authController.migrateData)
     this.router.post("/login", authController.login);
     this.router.post("/signup", authController.signup);
     this.router.post("/confirmation", authController.validateConfirmation);

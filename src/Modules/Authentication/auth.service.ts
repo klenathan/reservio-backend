@@ -19,6 +19,10 @@ export default class AuthService extends BaseService {
     super(db);
   }
 
+  migrateData = async () => {
+    
+  }
+
   handleLogin = async (username: string, password: string) => {
     let user = await this.db.user.findFirstOrThrow({
       where: { username: username, status: "ACTIVATE" },

@@ -10,6 +10,12 @@ export default class ProductService extends BaseService {
 
   getAllProduct = async () => {
     return await this.db.product.findMany({
+      take: 20,
+      orderBy: {
+        reviews: {
+          _count: "desc",
+        },
+      },
       include: {
         reviews: true,
         _count: {
@@ -99,5 +105,9 @@ export default class ProductService extends BaseService {
     });
 
     return result;
+  };
+
+  getAllDiscount = async () => {
+    return await this.db.discount.findMany();
   };
 }

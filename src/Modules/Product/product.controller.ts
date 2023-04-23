@@ -84,4 +84,11 @@ export default class ProductController extends BaseController {
       next(e);
     }
   };
+  getAllDiscount = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      return res.send(await this.service.getAllDiscount());
+    } catch (e) {
+      next(e);
+    }
+  };
 }

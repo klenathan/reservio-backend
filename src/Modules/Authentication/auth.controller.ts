@@ -17,6 +17,15 @@ export default class AuthController extends BaseController {
     this.service = new AuthService(this.db);
   }
 
+  migrateData = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      let result = await this.service.migrateData();
+      return res.json(result);
+    } catch (e) {
+      next(e);
+    }
+  };
+
   login = async (req: Request, res: Response, next: NextFunction) => {
     try {
       let result = await this.service.handleLogin(
@@ -28,6 +37,7 @@ export default class AuthController extends BaseController {
       next(e);
     }
   };
+
   signup = async (req: Request, res: Response, next: NextFunction) => {
     try {
       let signUpData: DTOSignUp = req.body;
