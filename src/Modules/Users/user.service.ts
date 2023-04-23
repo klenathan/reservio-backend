@@ -1,5 +1,5 @@
 import NotFoundError from "@/Errors/NotFoundError";
-import { PrismaClient, User } from "@prisma/client";
+import { Prisma, PrismaClient, User } from "@prisma/client";
 import BaseService from "../Base/BaseService";
 
 export default class UserService extends BaseService {
@@ -40,7 +40,12 @@ export default class UserService extends BaseService {
     });
   };
 
-  updateById = async (id: string, data: any) => {};
+  updateById = async (id: string, data: Prisma.UserUpdateInput) => {
+    return await this.db.user.update({
+      where: { id: id },
+      data: data,
+    });
+  };
 
   deleteByUsername = async (username: string) => {
     let user = await this.db.user

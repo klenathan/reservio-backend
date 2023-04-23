@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client";
 
 import BaseRouter from "../Base/BaseRouter";
 import VendorController from "./vendor.controller";
+import { JWTValidatorMiddlewareNonUser } from "@/Middlewares/JWTValidatorMiddlewareNonUser";
 
 export default class VendorRouter extends BaseRouter {
   public constructor(db: PrismaClient) {
@@ -17,12 +18,12 @@ export default class VendorRouter extends BaseRouter {
       JWTValidatorMiddleware,
       vendorController.requestNewVendor
     );
-    this.router.get(
-      "/:id",
-      JWTCheckMiddleware,
-      vendorController.getVendorByUsername
+    this.router.get("/:id", vendorController.getVendorByUsername);
+    this.router.put(
+      "/",
+      JWTValidatorMiddlewareNonUser,
+      vendorController.update
     );
-    this.router.patch("/:id");
     this.router.delete("/:id");
   }
 }

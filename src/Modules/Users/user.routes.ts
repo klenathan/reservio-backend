@@ -12,7 +12,7 @@ export default class UserRouter extends BaseRouter {
 
     this.router.get("/", JWTValidatorMiddleware, userController.getAllUsers);
     this.router.get("/:id", userController.getSingleUserByUsername);
-    this.router.patch("/:id", JWTValidatorMiddleware, userController.update);
+    this.router.put("/", JWTValidatorMiddleware, userController.update);
     this.router.delete("/:id", userController.deleteSingleUserByUsername);
   }
 }

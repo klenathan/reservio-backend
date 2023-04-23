@@ -21,7 +21,7 @@ export default class ProductRouter extends BaseRouter {
       JWTCheckMiddleware,
       productController.getSingleProduct
     );
-    this.router.patch("/:id");
+    this.router.put("/:id", JWTValidatorMiddleware, productController.update);
     this.router.delete("/:id");
   }
 }

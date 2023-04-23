@@ -2,6 +2,7 @@ import CustomError from "@/Errors/CustomError";
 import handleUploadMultipleImage from "@/Utils/HandleImages/handleUploadMultipleImages";
 import { Prisma, PrismaClient, Product } from "@prisma/client";
 import BaseService from "../Base/BaseService";
+import UnauthorizedError from "@/Errors/UnauthorizedError";
 
 export default class ProductService extends BaseService {
   private includeUserConfig = {
@@ -149,5 +150,29 @@ export default class ProductService extends BaseService {
 
   getAllDiscount = async () => {
     return await this.db.discount.findMany();
+  };
+
+  updateProduct = async (
+    id: string,
+    vendorID: string,
+    data: Prisma.ProductUpdateInput
+  ) => {
+    let product = await this.db.product
+      .findFirstOrThrow({
+        where: { id: id },
+        include: { vendor: true },
+      })
+      .then((r) => {
+        if (r.vendorId != vendorID) {
+          throw new UnauthorizedError(
+            "UNAUTHORIZED",
+            "You are not the owner of this service"
+          );
+        }
+      });
+    return await this.db.product.update({
+      where: { id: id },
+      data: data,
+    });
   };
 }

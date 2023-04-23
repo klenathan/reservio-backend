@@ -123,6 +123,6 @@ async function migrateReview() {
 }
 
 // migrateUsers()
-migrateServices()
+// migrateServices()
 // migrateDiscount()
-migrateReview();
+// migrateReview();

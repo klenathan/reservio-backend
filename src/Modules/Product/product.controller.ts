@@ -78,11 +78,9 @@ export default class ProductController extends BaseController {
 
   newProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      let data: Prisma.ProductCreateManyInput = req.body;
       if (req.body.user.vendor == null) {
         throw new UnauthorizedError("UNAUTHORIZED", "You are not yet a vendor");
       }
-      data.vendorId = req.body.user.vendor.id;
 
       if (!req.files) {
         throw new CustomError("MISSING_IMG", "Missing service images", 422);
@@ -100,6 +98,22 @@ export default class ProductController extends BaseController {
       next(e);
     }
   };
+
+  update = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (req.body.user.vendor == null) {
+        throw new UnauthorizedError("UNAUTHORIZED", "You are not yet a vendor");
+      }
+      const id = req.params.id;
+      const vendorID = req.body.user.vendor.id;
+      const { user, ...newData } = req.body;
+
+      return res.send(await this.service.updateProduct(id, vendorID, newData));
+    } catch (e) {
+      next(e);
+    }
+  };
+
   getAllDiscount = async (req: Request, res: Response, next: NextFunction) => {
     try {
       return res.send(await this.service.getAllDiscount());

@@ -43,6 +43,13 @@ export default class VendorService extends BaseService {
     });
   };
 
+  updateVendorData = async (id: string, data: Prisma.VendorUpdateInput) => {
+    return await this.db.vendor.update({
+      where: { id: id },
+      data: data,
+    });
+  };
+
   requestNewVendor = async (data: DTORequestVendor) => {
     let username = data.user.username;
     let vendorCheck = await this.db.vendor.findFirst({
