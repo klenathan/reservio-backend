@@ -5,6 +5,7 @@ import { Request, Response, NextFunction } from "express";
 /// controller
 import BaseController from "../Base/BaseController";
 import ProductService from "./product.service";
+import UnauthorizedError from "@/Errors/UnauthorizedError";
 
 const categories = [
   "Healthcare",
@@ -28,6 +29,18 @@ export default class ProductController extends BaseController {
   getAllProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
       return res.send(await this.service.getAllProduct());
+    } catch (e) {
+      next(e);
+    }
+  };
+
+  getHighlightProduct = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      return res.send(await this.service.getHighlightProduct());
     } catch (e) {
       next(e);
     }
@@ -65,8 +78,11 @@ export default class ProductController extends BaseController {
 
   newProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      let data = req.body;
-      data.vendorUsername = req.body.user.username;
+      let data: Prisma.ProductCreateManyInput = req.body;
+      if (req.body.user.vendor == null) {
+        throw new UnauthorizedError("UNAUTHORIZED", "You are not yet a vendor");
+      }
+      data.vendorId = req.body.user.vendor.id;
 
       if (!req.files) {
         throw new CustomError("MISSING_IMG", "Missing service images", 422);

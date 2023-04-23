@@ -35,8 +35,8 @@ model User {
 
 model confirmationCode {
   id          String @id @default(uuid())
-  user        User   @relation(fields: [username], references: [username])
-  username    String @unique
+  user        User   @relation(fields: [userId], references: [id])
+  userId      String @unique
   confirmCode String
 }
 
@@ -80,23 +80,23 @@ model Admin {
 }
 
 model Cart {
-  username  String
-  user      User    @relation(fields: [username], references: [id])
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
   productId String
   product   Product @relation(fields: [productId], references: [id])
   quantity  Int
   Vendor    Vendor? @relation(fields: [vendorId], references: [id])
   vendorId  String?
 
-  @@id([username, productId])
+  @@id([userId, productId])
 }
 
 model Ledger {
   id        String   @id @default(cuid())
   timestamp DateTime @default(now())
   path      String
-  username  String
-  user      User     @relation(fields: [username], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
   category  Category
 }
 
@@ -138,18 +138,18 @@ model ProuctReservation {
 }
 
 model Product {
-  id             String              @id @default(cuid())
-  vendorUsername String
-  category       Category            @default(Hospitality)
-  vendor         Vendor              @relation(fields: [vendorUsername], references: [username])
-  name           String
-  images         String[]
-  address        String
-  price          Int                 @db.Integer
-  desc           String              @db.Text
-  reviews        Review[]
-  avgReview      Float               @default(0)
-  reservation    ProuctReservation[]
+  id          String              @id @default(cuid())
+  vendorId    String
+  category    Category            @default(Hospitality)
+  vendor      Vendor              @relation(fields: [vendorId], references: [id])
+  name        String
+  images      String[]
+  address     String
+  price       Int                 @db.Integer
+  desc        String              @db.Text
+  reviews     Review[]
+  avgReview   Float               @default(0)
+  reservation ProuctReservation[]
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")

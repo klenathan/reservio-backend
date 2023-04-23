@@ -40,7 +40,7 @@ async function migrateServices() {
   let services = [];
   for (let i = 0; i < 100; i++) {
     let newService = {
-      vendorUsername: "pvdong",
+      vendorId: "clgt63tz80000xnja2hjlhxim", //pvdong
       name: faker.commerce.productName(),
       images: ["a83f578e-77e4-44c8-ab40-73314ba28ceb-current_best.png"],
       address:
@@ -85,3 +85,44 @@ async function migrateDiscount() {
       console.log("done");
     });
 }
+
+async function migrateReview() {
+  let reviews = [];
+  let users = await prisma.user.findMany({
+    take: 20,
+  });
+
+  let products = await prisma.product.findMany();
+
+  for (let i = 0; i < products.length; i++) {
+    let numberOfReview = Math.floor(Math.random() * users.length) + 10;
+    for (let j = 0; j < numberOfReview; j++) {
+      //   console.log(users[j]);
+      if (users[j] == undefined) continue;
+      let newReview = {
+        productId: products[i].id,
+        userId: users[j].id || "pvdong",
+        rating: Math.floor(Math.random() * 5) + 2,
+        feedback: faker.lorem.sentence(),
+      };
+      reviews.push(newReview);
+    }
+  }
+
+  await prisma.review
+    .createMany({
+      data: reviews,
+      skipDuplicates: true,
+    })
+    .then((r) => {
+      console.log("done");
+    })
+    .catch((e) => {
+      console.log(e);
+    });
+}
+
+// migrateUsers()
+migrateServices()
+// migrateDiscount()
+migrateReview();

@@ -4,19 +4,58 @@ import { Prisma, PrismaClient, Product } from "@prisma/client";
 import BaseService from "../Base/BaseService";
 
 export default class ProductService extends BaseService {
+  private includeUserConfig = {
+    select: {
+      id: true,
+      username: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      phoneNo: true,
+      avatar: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  };
+
   constructor(db: PrismaClient) {
     super(db);
   }
 
   getAllProduct = async () => {
     return await this.db.product.findMany({
-      take: 20,
       orderBy: {
         reviews: {
           _count: "desc",
         },
       },
       include: {
+        vendor: { include: { user: this.includeUserConfig } },
+        reviews: true,
+        _count: {
+          select: {
+            reviews: true,
+            reservation: true,
+          },
+        },
+      },
+    });
+  };
+
+  getHighlightProduct = async () => {
+    return await this.db.product.findMany({
+      take: 10,
+      orderBy: {
+        reservation: {
+          _count: "desc",
+        },
+        reviews: {
+          _count: "desc",
+        },
+      },
+      include: {
+        vendor: { include: { user: this.includeUserConfig } },
         reviews: true,
         _count: {
           select: {
@@ -32,8 +71,9 @@ export default class ProductService extends BaseService {
     let product = await this.db.product.findFirstOrThrow({
       where: { id: id },
       include: {
+        vendor: { include: { user: this.includeUserConfig } },
         reviews: {
-          include: { user: true },
+          include: { user: this.includeUserConfig },
         },
         _count: {
           select: {
@@ -94,7 +134,7 @@ export default class ProductService extends BaseService {
 
     let result = await this.db.product.create({
       data: {
-        vendor: { connect: { username: data.vendorUsername } },
+        vendor: { connect: { id: data.vendorId } },
         name: data.name,
         images: imagesUploaded,
         address: data.address || "",

@@ -21,7 +21,7 @@ export default class UserService extends BaseService {
     createdAt: true,
     updatedAt: true,
   };
-  
+
   constructor(db: PrismaClient) {
     super(db);
   }
@@ -39,6 +39,8 @@ export default class UserService extends BaseService {
       select: this.userQuerySelectConfig,
     });
   };
+
+  updateById = async (id: string, data: any) => {};
 
   deleteByUsername = async (username: string) => {
     let user = await this.db.user

@@ -2,7 +2,6 @@ import CustomError from "../Errors/CustomError";
 
 import { sign, verify, VerifyErrors } from "jsonwebtoken";
 import UnauthenticatedError from "@/Errors/UnauthenticatedError";
-import e from "express";
 
 const refreshTokenPair = (refreshToken: string): readonly [string, string] => {
   if (!process.env.JWT_SECRETE || !process.env.JWT_REFRESH_TOKEN_SECRETE) {

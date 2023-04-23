@@ -19,13 +19,12 @@ export default class AuthService extends BaseService {
     super(db);
   }
 
-  migrateData = async () => {
-    
-  }
+  migrateData = async () => {};
 
   handleLogin = async (username: string, password: string) => {
     let user = await this.db.user.findFirstOrThrow({
       where: { username: username, status: "ACTIVATE" },
+      include: {vendor:true , admin: true}
     });
 
     if (!(await comparePassword(password, user.password))) {
@@ -105,12 +104,13 @@ export default class AuthService extends BaseService {
 
   validateConfirmation = async (username: string, code: string) => {
     let confirmation = await this.db.confirmationCode.findFirstOrThrow({
-      where: { username: username },
+      where: { user: { username: username } },
+      include: { user: true },
     });
 
     if (confirmation.confirmCode == code) {
       await this.db.user.update({
-        where: { username: username },
+        where: { username: confirmation.user.username },
         data: { status: "ACTIVATE" },
       });
     }

@@ -22,7 +22,6 @@ export default class UserController extends BaseController {
     }
   };
 
-  
   getSingleUserByUsername = async (
     req: Request,
     res: Response,
@@ -39,6 +38,14 @@ export default class UserController extends BaseController {
       let result = await this.service.getSingleUserByUsername(username);
 
       return res.status(200).send(result);
+    } catch (e) {
+      next(e);
+    }
+  };
+
+  update = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      
     } catch (e) {
       next(e);
     }
@@ -64,5 +71,4 @@ export default class UserController extends BaseController {
       next(e);
     }
   };
-
 }

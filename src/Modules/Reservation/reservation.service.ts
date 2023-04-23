@@ -77,16 +77,7 @@ export default class ReservationService extends BaseService {
   };
 
   removeAllReservation = async () => {
-    let result = this.db.product.groupBy({
-      by: ["vendorUsername"],
-      where: {
-        id: {
-          in: ["clgki7tvo0006xnodn0ana1ub"],
-        },
-      },
-    });
-    return result;
-    // return { message: "DO NOT ACCESS" };
+    return { message: "DO NOT ACCESS" };
   };
 
   addToCart = async (data: DTOAddToCart) => {
