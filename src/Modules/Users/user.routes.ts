@@ -10,7 +10,7 @@ export default class UserRouter extends BaseRouter {
 
     let userController = new UserController(db);
 
-    this.router.get("/", JWTValidatorMiddleware, userController.getAllUsers);
+    this.router.get("/", userController.getAllUsers);
     this.router.get("/:id", userController.getSingleUserByUsername);
     this.router.put("/", JWTValidatorMiddleware, userController.update);
     this.router.delete("/:id", userController.deleteSingleUserByUsername);

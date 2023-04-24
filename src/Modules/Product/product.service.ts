@@ -48,9 +48,6 @@ export default class ProductService extends BaseService {
     return await this.db.product.findMany({
       take: 10,
       orderBy: {
-        reservation: {
-          _count: "desc",
-        },
         reviews: {
           _count: "desc",
         },

@@ -24,7 +24,7 @@ export default class AuthService extends BaseService {
   handleLogin = async (username: string, password: string) => {
     let user = await this.db.user.findFirstOrThrow({
       where: { username: username, status: "ACTIVATE" },
-      include: {vendor:true , admin: true}
+      include: { vendor: true, admin: true },
     });
 
     if (!(await comparePassword(password, user.password))) {
@@ -56,6 +56,11 @@ export default class AuthService extends BaseService {
     } else {
       fileName = `avatar/${randomUUID()}-${avatar.originalname}`;
     }
+
+    if (!data.email) {
+      throw new CustomError("MISSING_FIELD", "Missing email", 400);
+    }
+
     data.avatar = fileName;
 
     data.password = await hashPassword(data.password);
@@ -96,7 +101,7 @@ export default class AuthService extends BaseService {
     await sendEmail(
       `[Account Confirmation] ${data.username}`,
       confirmationEmailTemplate(data.username, generatedCode),
-      "rmit.clubapp@gmail.com"
+      data.email
     );
     const { id: _id, password: _pw, ...returnData } = newUser;
     return returnData;
