@@ -102,7 +102,7 @@ async function migrateReview() {
       let newReview = {
         productId: products[i].id,
         userId: users[j].id || "pvdong",
-        rating: Math.floor(Math.random() * 5) + 2,
+        rating: Math.floor(Math.random() * 4) + 2,
         feedback: faker.lorem.sentence(),
       };
       reviews.push(newReview);

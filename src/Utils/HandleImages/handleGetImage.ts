@@ -3,8 +3,8 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export default async function handleGetImage(fileName: string) {
   const config = {
-    accessKeyId: process.env.AWS_ACCESS_KEY,
-    secretAccessKey: process.env.AWS_SECRETE_ACCESS_KEY,
+    accessKeyId: process.env.AWS_ACCESS_KEY_,
+    secretAccessKey: process.env.AWS_SECRETE_ACCESS_KEY_,
     region: "ap-southeast-1",
   } as S3ClientConfig;
 

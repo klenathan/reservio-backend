@@ -91,6 +91,7 @@ model Cart {
   @@id([userId, productId])
 }
 
+
 model Ledger {
   id        String   @id @default(cuid())
   timestamp DateTime @default(now())
@@ -120,6 +121,8 @@ enum ReservationStatus {
   PENDING
   REJECTED
   ACCEPTED
+  ONGOING
+  FINISHED
 }
 
 model ProuctReservation {

@@ -9,8 +9,8 @@ console.log(
   "#",
   process.env.JWT_REFRESH_TOKEN_SECRETE?.substring(0, 3) + "..."
 );
-console.log("#", process.env.AWS_ACCESS_KEY?.substring(0, 3) + "...");
-console.log("#", process.env.AWS_SECRETE_ACCESS_KEY?.substring(0, 3) + "...");
+console.log("#", process.env.AWS_ACCESS_KEY_?.substring(0, 3) + "...");
+console.log("#", process.env.AWS_SECRETE_ACCESS_KEY_?.substring(0, 3) + "...");
 console.log("#".repeat(40));
 
 const server = new ReservioServer(8080);
