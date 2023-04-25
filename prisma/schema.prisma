@@ -50,9 +50,11 @@ enum UserStatus {
 model Vendor {
   id        String       @id @default(cuid())
   username  String       @unique
+  name      String
   userId    String       @unique
   certified Boolean      @default(false)
   status    VendorStatus @default(PENDING)
+  phone     String?
   desc      String
   user      User         @relation(fields: [userId], references: [id])
   products  Product[]
@@ -90,7 +92,6 @@ model Cart {
 
   @@id([userId, productId])
 }
-
 
 model Ledger {
   id        String   @id @default(cuid())
@@ -143,7 +144,7 @@ model ProuctReservation {
 model Product {
   id          String              @id @default(cuid())
   vendorId    String
-  category    Category            @default(Hospitality)
+  category    Category            @default(Others)
   vendor      Vendor              @relation(fields: [vendorId], references: [id])
   name        String
   images      String[]
@@ -196,4 +197,5 @@ enum Category {
   F_N_B
   Retail
   Hospitality
+  Others
 }

@@ -39,6 +39,9 @@ export default class VendorService extends BaseService {
       include: {
         user: this.includeUserConfig,
         products: true,
+        _count: {
+          select: { products: true },
+        },
       },
     });
   };
@@ -64,6 +67,7 @@ export default class VendorService extends BaseService {
     }
     return await this.db.vendor.create({
       data: {
+        name: data.name,
         username: data.user.username,
         desc: data.desc || "",
         user: { connect: { username: username } },

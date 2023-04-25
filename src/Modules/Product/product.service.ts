@@ -1,8 +1,10 @@
 import CustomError from "@/Errors/CustomError";
-import handleUploadMultipleImage from "@/Utils/HandleImages/handleUploadMultipleImages";
+import handleUploadMultipleProductImage from "@/Utils/HandleImages/handleUploadMultipleProductImage";
 import { Prisma, PrismaClient, Product } from "@prisma/client";
 import BaseService from "../Base/BaseService";
 import UnauthorizedError from "@/Errors/UnauthorizedError";
+import ICategory from "./Types/ICategory";
+import { log } from "console";
 
 export default class ProductService extends BaseService {
   private includeUserConfig = {
@@ -99,19 +101,39 @@ export default class ProductService extends BaseService {
   };
 
   getByCategory = async (category: Prisma.EnumCategoryFilter) => {
-    let result = this.db.product.findMany({
-      where: { category: category },
-      include: {
-        reviews: true,
-        _count: {
-          select: {
-            reviews: true,
-            reservation: true,
+    // let products = await
+
+    // let vendors = await
+
+    const [vendors, products] = await Promise.all([
+      this.db.vendor.findMany({
+        where: { category: { has: category as any } },
+        include: {
+          user: true,
+          _count: {
+            select: {
+              products: true,
+            },
           },
         },
-      },
-    });
-    return result;
+      }),
+      this.db.product.findMany({
+        where: { category: category as Prisma.EnumCategoryFilter },
+        include: {
+          reviews: true,
+          _count: {
+            select: {
+              reviews: true,
+              reservation: true,
+            },
+          },
+        },
+      }),
+    ]);
+    return {
+      vendors: vendors,
+      products: products,
+    };
   };
 
   createProduct = async (
@@ -128,7 +150,7 @@ export default class ProductService extends BaseService {
       );
     }
 
-    let imagesUploaded = await handleUploadMultipleImage(images);
+    let imagesUploaded = await handleUploadMultipleProductImage(images);
 
     let result = await this.db.product.create({
       data: {

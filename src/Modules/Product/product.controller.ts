@@ -6,6 +6,7 @@ import { Request, Response, NextFunction } from "express";
 import BaseController from "../Base/BaseController";
 import ProductService from "./product.service";
 import UnauthorizedError from "@/Errors/UnauthorizedError";
+import ICategory from "./Types/ICategory";
 
 const categories = [
   "Healthcare",
@@ -17,6 +18,7 @@ const categories = [
   "F_N_B",
   "Retail",
   "Hospitality",
+  "Others",
 ];
 
 export default class ProductController extends BaseController {

@@ -1,9 +1,18 @@
 service: reservio-test-v01
+useDotenv: true
 
 provider:
   name: aws
   runtime: nodejs18.x
   region: ap-southeast-1
+  environment:
+    EMAIL_PW: ${env:EMAIL_PW}
+    DATABASE_URL: ${env:DATABASE_URL}
+    JWT_SECRETE: ${env:JWT_SECRETE}
+    JWT_REFRESH_TOKEN_SECRETE: ${env:JWT_REFRESH_TOKEN_SECRETE}
+    AWS_ACCESS_KEY_: ${env:AWS_ACCESS_KEY_}
+    AWS_SECRETE_ACCESS_KEY_: ${env:AWS_SECRETE_ACCESS_KEY_}
+    PRISMA_CLI_BINARY_TARGETS: ${env:PRISMA_CLI_BINARY_TARGETS}
 
 functions:
   app:
