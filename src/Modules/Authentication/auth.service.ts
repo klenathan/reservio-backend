@@ -13,6 +13,7 @@ import { comparePassword, hashPassword } from "./Utils/passwordUtils";
 import sendEmail from "@/Utils/sendEmail";
 import generateCode from "@/Utils/generateConfirmationString";
 import confirmationEmailTemplate from "@/Utils/emailTemplates/confirmationEmailTemplate";
+import axios from "axios";
 
 export default class AuthService extends BaseService {
   public constructor(db: PrismaClient) {
@@ -96,13 +97,19 @@ export default class AuthService extends BaseService {
         }
         throw e;
       });
+    //// Send Email Service
+    const sendData = {
+      email: data.email,
+      username: data.username,
+      code: generatedCode,
+    };
 
-    /// Send E-mail
-    await sendEmail(
-      `[Account Confirmation] ${data.username}`,
-      confirmationEmailTemplate(data.username, generatedCode),
-      data.email
-    );
+    await axios
+      .post(`${process.env.EMAIL_SERVICE}/confirmation`, sendData)
+      .catch((e) => {
+        console.log(e);
+      });
+
     const { id: _id, password: _pw, ...returnData } = newUser;
     return returnData;
   };

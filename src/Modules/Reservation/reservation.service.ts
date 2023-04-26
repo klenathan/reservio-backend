@@ -43,35 +43,34 @@ export default class ReservationService extends BaseService {
     });
   };
 
-  /////// WORKING ON THIS
+  /////// TODO: Implement discount
   newReservation = async (data: DTONewReservation) => {
     let productQuery = await this.db.product
       .findFirstOrThrow({
-        where: { id: data.product.productId },
+        where: { id: data.productId },
         include: { ProductFixedTimeSlot: true },
       })
       .then((r) => {
         if (!r) {
           throw new NotFoundError(
             "PRODUCT_NOT_FOUND",
-            `${data.product.productId} cannot be found`
+            `${data.productId} cannot be found`
           );
         }
         return r;
       });
 
     let _: Prisma.ReservationCreateInput;
-    
 
     if (productQuery.type == "FIXED") {
       return await this.db.reservation.create({
         data: {
           customer: { connect: { username: data.user.username } },
-          total: data.product.quantity * productQuery.price,
-          quantity: data.product.quantity,
-          Product: { connect: { id: data.product.productId } },
+          total: data.quantity * productQuery.price,
+          quantity: data.quantity,
+          Product: { connect: { id: data.productId } },
           ProductFixedTimeSlot: {
-            connect: { id: data.product.productFixedTimeSlotId },
+            connect: { id: data.productFixedTimeSlotId },
           },
         },
         include: this.reservationQueryOption,
@@ -87,14 +86,20 @@ export default class ReservationService extends BaseService {
         400
       );
     }
+    let startTime = new Date(data.startAt);
+    let endTime = new Date(data.endAt);
+
     return await this.db.reservation.create({
       data: {
         customer: { connect: { username: data.user.username } },
-        total: 1000,
-        quantity: data.product.quantity,
-        Product: { connect: { id: data.product.productId } },
-        startAt: new Date(data.startAt),
-        endAt: new Date(data.endAt),
+        total:
+          data.quantity *
+          productQuery.price *
+          (Math.abs(endTime.getTime() - startTime.getTime()) / 3600000),
+        quantity: data.quantity,
+        Product: { connect: { id: data.productId } },
+        startAt: startTime,
+        endAt: endTime,
       },
       include: this.reservationQueryOption,
     });
