@@ -4,7 +4,7 @@ import { Prisma, PrismaClient, Product } from "@prisma/client";
 import BaseService from "../Base/BaseService";
 import UnauthorizedError from "@/Errors/UnauthorizedError";
 import ICategory from "./Types/ICategory";
-import { log } from "console";
+import NewProductDTO from "./Types/NewProductDTO";
 
 export default class ProductService extends BaseService {
   private includeUserConfig = {
@@ -67,6 +67,12 @@ export default class ProductService extends BaseService {
     });
   };
 
+  /**
+   * Retrieve a single product by its id
+   * @param id The id of the product to retrieve
+   * @returns An object containing the retrieved product and its average rating
+   * @throws {CustomError} If the product with the specified id does not exist
+   */
   getSingleProduct = async (id: string) => {
     let product = await this.db.product.findFirstOrThrow({
       where: { id: id },
@@ -92,19 +98,16 @@ export default class ProductService extends BaseService {
       avg = sum / product._count.reviews;
     }
 
-    let result = { avgRating: avg, ...product };
-    return result;
+    return { avgRating: avg, ...product };
   };
 
-  calculateReviews = async () => {
-    return;
-  };
-
+  /**
+  Retrieves vendors and products filtered by category.
+  @async
+  @param {Prisma.EnumCategoryFilter} category - The category to filter by.
+  @returns {Promise<{vendors: Vendor[], products: Product[]}>} An object containing the vendors and products arrays.
+  */
   getByCategory = async (category: Prisma.EnumCategoryFilter) => {
-    // let products = await
-
-    // let vendors = await
-
     const [vendors, products] = await Promise.all([
       this.db.vendor.findMany({
         where: { category: { has: category as any } },
@@ -136,10 +139,19 @@ export default class ProductService extends BaseService {
     };
   };
 
+  /**
+   * Creates a new product and uploads images for it
+   * @param {NewProductDTO} data - The data for the new product
+   * @param {Express.Multer.File[]} images - The images to upload for the product
+   * @returns {Promise} A promise that resolves to the newly created product
+   */
   createProduct = async (
-    data: Prisma.ProductCreateManyInput,
+    data: NewProductDTO,
     images: Express.Multer.File[]
   ) => {
+    let result;
+
+    // Validate required fields
     if (!(data.name && data.price)) {
       throw new CustomError(
         "MISSING_FIELD",
@@ -150,19 +162,56 @@ export default class ProductService extends BaseService {
       );
     }
 
-    let imagesUploaded = await handleUploadMultipleProductImage(images);
+    // Upload product images
+    const imagesUploaded = await handleUploadMultipleProductImage(images);
 
-    let result = await this.db.product.create({
-      data: {
-        vendor: { connect: { id: data.vendorId } },
-        name: data.name,
-        images: imagesUploaded,
-        address: data.address || "",
-        price: parseInt(data.price as unknown as string),
-        desc: data.desc || "",
-      },
-      include: { vendor: true },
-    });
+    // Check if the user is a vendor
+    if (!data.user.vendor) {
+      return 0;
+    }
+
+    // Create the product based on its type
+    if (data.type === "FLEXIBLE") {
+      result = await this.db.product.create({
+        data: {
+          vendor: { connect: { id: data.user.vendor.id } },
+          name: data.name,
+          images: imagesUploaded,
+          address: data.address || "RMIT University Vietnam",
+          price: data.price,
+          desc: data.desc || "",
+          type: data.type,
+        },
+        include: { vendor: true },
+      });
+    } else if (data.type === "FIXED") {
+      if (!data.ProductFixedTimeSlot) {
+        throw new CustomError("INVALID_INPUT", "Missing Time Slots", 422);
+      }
+      result = await this.db.product.create({
+        data: {
+          vendor: { connect: { id: data.user.vendor.id } },
+          ProductFixedTimeSlot: {
+            createMany: {
+              data: data.ProductFixedTimeSlot as Prisma.ProductFixedTimeSlotCreateManyProductInput,
+            },
+          },
+          name: data.name,
+          images: imagesUploaded,
+          address: data.address || "RMIT University Vietnam",
+          price: data.price,
+          desc: data.desc || "",
+          type: data.type,
+        },
+        include: { vendor: true },
+      });
+    } else {
+      throw new CustomError(
+        "INVALID_PRODUCT_TYPE",
+        "Product type can only be 'FIXED' or 'FLEXIBLE'",
+        422
+      );
+    }
 
     return result;
   };
@@ -176,7 +225,7 @@ export default class ProductService extends BaseService {
     vendorID: string,
     data: Prisma.ProductUpdateInput
   ) => {
-    let product = await this.db.product
+    await this.db.product
       .findFirstOrThrow({
         where: { id: id },
         include: { vendor: true },

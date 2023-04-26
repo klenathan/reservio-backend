@@ -1,7 +1,7 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
 
 type DTORequestVendor = Prisma.VendorCreateInput & {
-  user: any;
+  user: User;
 };
 
 export default DTORequestVendor;

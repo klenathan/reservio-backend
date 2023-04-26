@@ -26,7 +26,6 @@ model User {
 
   createdAt        DateTime          @default(now()) @map(name: "created_at")
   updatedAt        DateTime          @updatedAt @map(name: "updated_at")
-  Cart             Cart[]
   Ledger           Ledger[]
   confirmationCode confirmationCode?
 
@@ -60,10 +59,8 @@ model Vendor {
   products  Product[]
   category  Category[]   @default([Hospitality])
 
-  createdAt   DateTime      @default(now()) @map(name: "created_at")
-  updatedAt   DateTime      @updatedAt @map(name: "updated_at")
-  Reservation Reservation[]
-  Cart        Cart[]
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
 }
 
 enum VendorStatus {
@@ -81,18 +78,6 @@ model Admin {
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 }
 
-model Cart {
-  userId    String
-  user      User    @relation(fields: [userId], references: [id])
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
-  quantity  Int
-  Vendor    Vendor? @relation(fields: [vendorId], references: [id])
-  vendorId  String?
-
-  @@id([userId, productId])
-}
-
 model Ledger {
   id        String   @id @default(cuid())
   timestamp DateTime @default(now())
@@ -103,19 +88,24 @@ model Ledger {
 }
 
 model Reservation {
-  id         String            @id @default(cuid())
-  userId     String
-  customer   User              @relation(fields: [userId], references: [id])
-  vendorId   String
-  vendor     Vendor            @relation(fields: [vendorId], references: [id])
-  discountId String?
-  discount   Discount?         @relation(fields: [discountId], references: [id])
-  status     ReservationStatus @default(PENDING)
-  total      Int
+  id       String @id @default(cuid())
+  userId   String
+  customer User   @relation(fields: [userId], references: [id])
 
-  createdAt         DateTime            @default(now()) @map(name: "created_at")
-  updatedAt         DateTime            @updatedAt @map(name: "updated_at")
-  ProuctReservation ProuctReservation[]
+  status ReservationStatus @default(PENDING)
+  total  Int
+
+  discount   Discount? @relation(fields: [discountId], references: [id])
+  discountId String?
+
+  Product   Product? @relation(fields: [productId], references: [id])
+  productId String?
+
+  ProductFixedTimeSlot   ProductFixedTimeSlot? @relation(fields: [productFixedTimeSlotId], references: [id])
+  productFixedTimeSlotId String?
+
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
 }
 
 enum ReservationStatus {
@@ -126,38 +116,59 @@ enum ReservationStatus {
   FINISHED
 }
 
-model ProuctReservation {
-  productId     String
-  product       Product     @relation(fields: [productId], references: [id])
-  reservationId String
-  reservation   Reservation @relation(fields: [reservationId], references: [id])
-  quantity      Int
-  startAt       DateTime    @default(now())
-  endAt         DateTime?
+// model ProuctReservation {
+//   productId              String
+//   reservationId          String
+//   productFixedTimeSlotId String?
+//   quantity               Int
+//   startAt                DateTime  @default(now())
+//   endAt                  DateTime?
 
-  createdAt DateTime @default(now()) @map(name: "created_at")
-  updatedAt DateTime @updatedAt @map(name: "updated_at")
+//   product     Product               @relation(fields: [productId], references: [id])
+//   reservation Reservation           @relation(fields: [reservationId], references: [id])
+//   timeSlot    ProductFixedTimeSlot? @relation(fields: [productFixedTimeSlotId], references: [id])
 
-  @@id([productId, reservationId])
-}
+//   createdAt DateTime @default(now()) @map(name: "created_at")
+//   updatedAt DateTime @updatedAt @map(name: "updated_at")
+
+//   @@id([productId, reservationId])
+// }
 
 model Product {
-  id          String              @id @default(cuid())
-  vendorId    String
-  category    Category            @default(Others)
-  vendor      Vendor              @relation(fields: [vendorId], references: [id])
-  name        String
+  id       String      @id @default(cuid())
+  vendorId String
+  category Category    @default(Others)
+  vendor   Vendor      @relation(fields: [vendorId], references: [id])
+  name     String
+  address  String
+  price    Int         @db.Integer
+  desc     String      @db.Text
+  quantity Int         @default(0)
+  type     ProductType @default(FLEXIBLE)
+
   images      String[]
-  address     String
-  price       Int                 @db.Integer
-  desc        String              @db.Text
   reviews     Review[]
-  avgReview   Float               @default(0)
-  reservation ProuctReservation[]
+  Reservation Reservation[]
+
+  ProductFixedTimeSlot ProductFixedTimeSlot[]
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
-  Cart      Cart[]
+}
+
+enum ProductType {
+  FIXED
+  FLEXIBLE
+}
+
+model ProductFixedTimeSlot {
+  id                String        @id @default(uuid())
+  product           Product       @relation(fields: [productId], references: [id])
+  productId         String
+  from              DateTime
+  to                DateTime
+  quantity          Int
+  ProuctReservation Reservation[]
 }
 
 model Review {

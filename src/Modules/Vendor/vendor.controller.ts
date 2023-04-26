@@ -69,7 +69,7 @@ export default class VendorController extends BaseController {
       let data: DTORequestVendor = req.body;
       let result = await this.service.requestNewVendor(data);
       if (!data.name) {
-        data.name = data.user.firstName;
+        data.name = data.user.firstName || "New Vendor";
       }
       return res.status(200).send(result);
     } catch (e) {
