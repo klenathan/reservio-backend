@@ -92,8 +92,9 @@ model Reservation {
   userId   String
   customer User   @relation(fields: [userId], references: [id])
 
-  status ReservationStatus @default(PENDING)
-  total  Int
+  quantity Int
+  status   ReservationStatus @default(PENDING)
+  total    Int
 
   discount   Discount? @relation(fields: [discountId], references: [id])
   discountId String?
@@ -103,6 +104,9 @@ model Reservation {
 
   ProductFixedTimeSlot   ProductFixedTimeSlot? @relation(fields: [productFixedTimeSlotId], references: [id])
   productFixedTimeSlotId String?
+
+  startAt DateTime?
+  endAt   DateTime?
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")

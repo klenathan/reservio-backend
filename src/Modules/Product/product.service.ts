@@ -39,7 +39,7 @@ export default class ProductService extends BaseService {
         _count: {
           select: {
             reviews: true,
-            reservation: true,
+            Reservation: true,
           },
         },
       },
@@ -60,7 +60,7 @@ export default class ProductService extends BaseService {
         _count: {
           select: {
             reviews: true,
-            reservation: true,
+            Reservation: true,
           },
         },
       },
@@ -84,7 +84,7 @@ export default class ProductService extends BaseService {
         _count: {
           select: {
             reviews: true,
-            reservation: true,
+            Reservation: true,
           },
         },
       },
@@ -127,7 +127,7 @@ export default class ProductService extends BaseService {
           _count: {
             select: {
               reviews: true,
-              reservation: true,
+              Reservation: true,
             },
           },
         },

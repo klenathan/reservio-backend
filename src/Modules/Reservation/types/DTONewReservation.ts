@@ -7,5 +7,7 @@ export default interface DTONewReservation {
     productFixedTimeSlotId: string;
     quantity: number;
   };
+  startAt?: number;
+  endAt?: number;
   discountId?: string;
 }

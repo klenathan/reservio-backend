@@ -2,6 +2,8 @@ import { Prisma, PrismaClient } from "@prisma/client";
 import BaseService from "../Base/BaseService";
 import DTOAddToCart from "./types/DTOAddToCart";
 import DTONewReservation from "./types/DTONewReservation";
+import NotFoundError from "@/Errors/NotFoundError";
+import CustomError from "@/Errors/CustomError";
 
 export default class ReservationService extends BaseService {
   private userQuerySelectConfig = {
@@ -16,66 +18,83 @@ export default class ReservationService extends BaseService {
     createdAt: true,
     updatedAt: true,
   };
+  private reservationQueryOption = {
+    customer: {
+      select: this.userQuerySelectConfig,
+    },
+    Product: true,
+    ProductFixedTimeSlot: true,
+  };
 
   constructor(db: PrismaClient) {
     super(db);
   }
   getAllReservation = async () => {
-    return await this.db.reservation.findMany();
+    return await this.db.reservation.findMany({
+      include: this.reservationQueryOption,
+    });
   };
+
+  getSingleReservation = async (id: string) => {
+    return await this.db.reservation.findFirstOrThrow({
+      where: { id: id },
+      include: this.reservationQueryOption,
+    });
+  };
+
   /////// WORKING ON THIS
   newReservation = async (data: DTONewReservation) => {
-    let product = await this.db.product.findFirstOrThrow({
-      where: { id: data.product.productId },
-    });
+    let productQuery = await this.db.product
+      .findFirstOrThrow({
+        where: { id: data.product.productId },
+        include: { ProductFixedTimeSlot: true },
+      })
+      .then((r) => {
+        if (!r) {
+          throw new NotFoundError(
+            "PRODUCT_NOT_FOUND",
+            `${data.product.productId} cannot be found`
+          );
+        }
+        return r;
+      });
 
     let _: Prisma.ReservationCreateInput;
 
-    if (product.type == "FIXED") {
-      await this.db.reservation.create({
+    if (productQuery.type == "FIXED") {
+      return await this.db.reservation.create({
         data: {
           customer: { connect: { username: data.user.username } },
-          total: 1000,
-          ProuctReservation: {
-            createMany: {
-              data: [
-                {
-                  quantity: data.product.quantity,
-                  productId: product.id,
-                  productFixedTimeSlotId: data.product.productFixedTimeSlotId,
-                },
-              ],
-            },
+          total: data.product.quantity * productQuery.price,
+          quantity: data.product.quantity,
+          Product: { connect: { id: data.product.productId } },
+          ProductFixedTimeSlot: {
+            connect: { id: data.product.productFixedTimeSlotId },
           },
         },
-        include: {
-          customer: {
-            select: this.userQuerySelectConfig,
-          },
-          ProuctReservation: {
-            include: { product: true },
-          },
-        },
+        include: this.reservationQueryOption,
       });
-    } else {
     }
 
+    //// If the Service is flexible time,
+    //// 'ProductFixedTimeSlot' attribute is not needed
+    if (!data.startAt || !data.endAt) {
+      throw new CustomError(
+        "INVALID_INPUT",
+        "Flexible Service need to include 'startAt' and 'endAt'",
+        400
+      );
+    }
     return await this.db.reservation.create({
       data: {
         customer: { connect: { username: data.user.username } },
         total: 1000,
-        ProuctReservation: {
-          create: { quantity: data.product.quantity, productId: product.id },
-        },
+        quantity: data.product.quantity,
+        Product: { connect: { id: data.product.productId } },
+        startAt: new Date(data.startAt),
+        endAt: new Date(data.endAt),
       },
-      include: {
-        customer: {
-          select: this.userQuerySelectConfig,
-        },
-        ProuctReservation: {
-          include: { product: true },
-        },
-      },
+      include: this.reservationQueryOption,
     });
   };
 
@@ -90,14 +109,7 @@ export default class ReservationService extends BaseService {
       data: {
         status: status,
       },
-      include: {
-        customer: {
-          select: this.userQuerySelectConfig,
-        },
-        ProuctReservation: {
-          include: { product: true },
-        },
-      },
+      include: this.reservationQueryOption,
     });
     return reservation;
   };
