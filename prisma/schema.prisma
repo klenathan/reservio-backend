@@ -99,8 +99,8 @@ model Reservation {
   discount   Discount? @relation(fields: [discountId], references: [id])
   discountId String?
 
-  Product   Product? @relation(fields: [productId], references: [id])
-  productId String?
+  Product   Product @relation(fields: [productId], references: [id])
+  productId String
 
   ProductFixedTimeSlot   ProductFixedTimeSlot? @relation(fields: [productFixedTimeSlotId], references: [id])
   productFixedTimeSlotId String?

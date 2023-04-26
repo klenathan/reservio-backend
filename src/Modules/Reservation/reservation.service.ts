@@ -4,6 +4,7 @@ import DTOAddToCart from "./types/DTOAddToCart";
 import DTONewReservation from "./types/DTONewReservation";
 import NotFoundError from "@/Errors/NotFoundError";
 import CustomError from "@/Errors/CustomError";
+import { log } from "console";
 
 export default class ReservationService extends BaseService {
   private userQuerySelectConfig = {
@@ -60,6 +61,7 @@ export default class ReservationService extends BaseService {
       });
 
     let _: Prisma.ReservationCreateInput;
+    
 
     if (productQuery.type == "FIXED") {
       return await this.db.reservation.create({

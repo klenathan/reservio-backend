@@ -7,9 +7,15 @@ export default class SeachService extends BaseService {
     super(db);
   }
   search = async (query: string) => {
-
     const userQuery = async () => {
       return await this.db.vendor.findMany({
+        include: {
+          _count: {
+            select: {
+              products: true,
+            },
+          },
+        },
         where: {
           OR: [
             {
@@ -43,6 +49,7 @@ export default class SeachService extends BaseService {
 
     const productQuery = async () => {
       return await this.db.product.findMany({
+        include: { vendor: true },
         where: {
           OR: [
             {
@@ -78,7 +85,7 @@ export default class SeachService extends BaseService {
       userQuery(),
       productQuery(),
     ]);
-    
+
     const result = {
       vendors: userResult,
       products: productResult,

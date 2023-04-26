@@ -35,6 +35,7 @@ export default class ProductService extends BaseService {
       },
       include: {
         vendor: { include: { user: this.includeUserConfig } },
+        ProductFixedTimeSlot: true,
         reviews: true,
         _count: {
           select: {
@@ -56,6 +57,7 @@ export default class ProductService extends BaseService {
       },
       include: {
         vendor: { include: { user: this.includeUserConfig } },
+        ProductFixedTimeSlot: true,
         reviews: true,
         _count: {
           select: {
@@ -78,6 +80,7 @@ export default class ProductService extends BaseService {
       where: { id: id },
       include: {
         vendor: { include: { user: this.includeUserConfig } },
+        ProductFixedTimeSlot: true,
         reviews: {
           include: { user: this.includeUserConfig },
         },
@@ -124,6 +127,7 @@ export default class ProductService extends BaseService {
         where: { category: category as Prisma.EnumCategoryFilter },
         include: {
           reviews: true,
+          ProductFixedTimeSlot: true,
           _count: {
             select: {
               reviews: true,
@@ -143,7 +147,7 @@ export default class ProductService extends BaseService {
    * Creates a new product and uploads images for it
    * @param {NewProductDTO} data - The data for the new product
    * @param {Express.Multer.File[]} images - The images to upload for the product
-   * @returns {Promise} A promise that resolves to the newly created product
+   * @returns {Product} A  newly created product
    */
   createProduct = async (
     data: NewProductDTO,
@@ -178,32 +182,57 @@ export default class ProductService extends BaseService {
           name: data.name,
           images: imagesUploaded,
           address: data.address || "RMIT University Vietnam",
-          price: data.price,
+          price: parseInt(data.price as unknown as string),
           desc: data.desc || "",
           type: data.type,
         },
-        include: { vendor: true },
+        include: { vendor: true, ProductFixedTimeSlot: true },
       });
     } else if (data.type === "FIXED") {
-      if (!data.ProductFixedTimeSlot) {
-        throw new CustomError("INVALID_INPUT", "Missing Time Slots", 422);
+      if (!data.timeSlot) {
+        throw new CustomError(
+          "INVALID_INPUT",
+          "Missing 'ProductFixedTimeSlot' from request",
+          422
+        );
       }
+      // console.log(data);
+      data.timeSlotConverted = data.timeSlot.map((slot) => {
+        return JSON.parse(slot);
+      });
+
+      if (!data.timeSlotConverted) {
+        throw new CustomError(
+          "ERROR_CONVERT",
+          "Server converting error in product.service",
+          500
+        );
+      }
+      console.log(data);
       result = await this.db.product.create({
         data: {
           vendor: { connect: { id: data.user.vendor.id } },
           ProductFixedTimeSlot: {
             createMany: {
-              data: data.ProductFixedTimeSlot as Prisma.ProductFixedTimeSlotCreateManyProductInput,
+              data: data.timeSlotConverted.map((slot) => {
+                console.log("From:",new Date(slot.from));
+
+                return {
+                  from: new Date(slot.from),
+                  to: new Date(slot.to),
+                  quantity: slot.quantity,
+                };
+              }),
             },
           },
           name: data.name,
           images: imagesUploaded,
           address: data.address || "RMIT University Vietnam",
-          price: data.price,
+          price: parseInt(data.price as unknown as string),
           desc: data.desc || "",
           type: data.type,
         },
-        include: { vendor: true },
+        include: { vendor: true, ProductFixedTimeSlot: true },
       });
     } else {
       throw new CustomError(
@@ -228,7 +257,7 @@ export default class ProductService extends BaseService {
     await this.db.product
       .findFirstOrThrow({
         where: { id: id },
-        include: { vendor: true },
+        include: { vendor: true, ProductFixedTimeSlot: true },
       })
       .then((r) => {
         if (r.vendorId != vendorID) {
