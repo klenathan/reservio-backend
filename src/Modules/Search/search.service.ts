@@ -10,6 +10,7 @@ export default class SeachService extends BaseService {
     const userQuery = async () => {
       return await this.db.vendor.findMany({
         include: {
+          user: true,
           _count: {
             select: {
               products: true,

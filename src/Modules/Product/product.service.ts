@@ -127,7 +127,8 @@ export default class ProductService extends BaseService {
         where: { category: category as Prisma.EnumCategoryFilter },
         include: {
           reviews: true,
-          ProductFixedTimeSlot: true,
+          vendor: true,
+          // ProductFixedTimeSlot: true,
           _count: {
             select: {
               reviews: true,
@@ -196,7 +197,6 @@ export default class ProductService extends BaseService {
           422
         );
       }
-      // console.log(data);
       data.timeSlotConverted = data.timeSlot.map((slot) => {
         return JSON.parse(slot);
       });
@@ -208,14 +208,13 @@ export default class ProductService extends BaseService {
           500
         );
       }
-      console.log(data);
       result = await this.db.product.create({
         data: {
           vendor: { connect: { id: data.user.vendor.id } },
           ProductFixedTimeSlot: {
             createMany: {
               data: data.timeSlotConverted.map((slot) => {
-                console.log("From:",new Date(slot.from));
+                console.log("From:", new Date(slot.from));
 
                 return {
                   from: new Date(slot.from),

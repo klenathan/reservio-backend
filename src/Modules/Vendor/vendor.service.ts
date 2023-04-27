@@ -7,6 +7,7 @@ export default class VendorService extends BaseService {
   private includeUserConfig = {
     select: {
       id: true,
+      admin: true,
       username: true,
       firstName: true,
       lastName: true,
