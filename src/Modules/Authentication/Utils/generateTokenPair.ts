@@ -1,5 +1,5 @@
 
-import CustomError from "../Errors/CustomError";
+import CustomError from "../../../Errors/CustomError";
 import { sign } from "jsonwebtoken";
 
 const generateTokenPair = (userData: any): readonly [string, string] => {

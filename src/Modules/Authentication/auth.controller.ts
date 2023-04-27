@@ -1,6 +1,6 @@
 import CustomError from "@/Errors/CustomError";
 import UnauthenticatedError from "@/Errors/UnauthenticatedError";
-import refreshTokenPair from "@/Utils/refreshToken";
+import refreshTokenPair from "@/Modules/Authentication/Utils/refreshToken";
 import { PrismaClient } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { deprecate } from "util";
@@ -58,16 +58,19 @@ export default class AuthController extends BaseController {
         );
       }
 
-      const [accessToken, refreshToken, user] = refreshTokenPair(
-        req.headers.authorization
-      );
+      // const [accessToken, refreshToken, user] = refreshTokenPair(
+      //   req.headers.authorization
+      // );
 
-      return res.status(200).send({
-        status: "success",
-        user: user,
-        accessToken: accessToken,
-        refreshToken: refreshToken,
-      });
+      // return res.status(200).send({
+      //   status: "success",
+      //   user: user,
+      //   accessToken: accessToken,
+      //   refreshToken: refreshToken,
+      // });
+      return res.send(
+        await this.service.refreshToken(req.headers.authorization)
+      );
     } catch (e) {
       next(e);
     }

@@ -5,7 +5,7 @@ import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
 import CustomError from "@/Errors/CustomError";
 import UnauthenticatedError from "@/Errors/UnauthenticatedError";
-import generateTokenPair from "@/Utils/generateTokenPair";
+import generateTokenPair from "@/Modules/Authentication/Utils/generateTokenPair";
 import handleImageUpload from "@/Utils/HandleImages/handleImgUpload";
 import BaseService from "../Base/BaseService";
 import DTOSignUp from "./Types/DTOSignUp";
@@ -14,8 +14,25 @@ import sendEmail from "@/Utils/sendEmail";
 import generateCode from "@/Utils/generateConfirmationString";
 import confirmationEmailTemplate from "@/Utils/emailTemplates/confirmationEmailTemplate";
 import axios from "axios";
+import validateRefreshToken from "./Utils/validateRefreshToken";
+import UserDTO from "./Types/UserDTO";
 
 export default class AuthService extends BaseService {
+  private userQuerySelectConfig = {
+    id: true,
+    username: true,
+    firstName: true,
+    lastName: true,
+    email: true,
+    phoneNo: true,
+    avatar: true,
+    vendor: true,
+    status: true,
+    admin: true,
+    createdAt: true,
+    updatedAt: true,
+  };
+
   public constructor(db: PrismaClient) {
     super(db);
   }
@@ -44,6 +61,26 @@ export default class AuthService extends BaseService {
       user: returnData,
       accessToken: accessToken,
       refreshToken: refreshToken,
+    };
+  };
+
+  refreshToken = async (refreshToken: string) => {
+    let requestUserData: UserDTO = validateRefreshToken(
+      refreshToken
+    ) as unknown as UserDTO;
+
+    let userDataQuery = await this.db.user.findFirstOrThrow({
+      where: { id: requestUserData.id },
+      select: this.userQuerySelectConfig,
+    });
+
+    const [newAccessToken, newRefreshToken] = generateTokenPair(userDataQuery);
+
+    return {
+      status: "success",
+      user: userDataQuery,
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
     };
   };
 

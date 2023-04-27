@@ -19,6 +19,7 @@ export default class ReservationService extends BaseService {
     createdAt: true,
     updatedAt: true,
   };
+  
   private reservationQueryOption = {
     customer: {
       select: this.userQuerySelectConfig,

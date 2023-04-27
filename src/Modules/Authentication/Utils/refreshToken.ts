@@ -1,4 +1,4 @@
-import CustomError from "../Errors/CustomError";
+import CustomError from "../../../Errors/CustomError";
 
 import { sign, verify, VerifyErrors } from "jsonwebtoken";
 import UnauthenticatedError from "@/Errors/UnauthenticatedError";
@@ -11,6 +11,7 @@ const refreshTokenPair = (refreshToken: string): readonly [string, string, any] 
       500
     );
   }
+
   let jwtSecrete = process.env.JWT_SECRETE;
   let jwtRefreshTokenSecrete = process.env.JWT_REFRESH_TOKEN_SECRETE;
 

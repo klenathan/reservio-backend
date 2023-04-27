@@ -10,8 +10,9 @@ export default class ReviewService extends BaseService {
     email: true,
     phoneNo: true,
     avatar: true,
+    vendor: true,
     status: true,
-    admin: { select: { id: true } },
+    admin: true,
     createdAt: true,
     updatedAt: true,
   };

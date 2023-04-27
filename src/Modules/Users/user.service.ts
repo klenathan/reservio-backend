@@ -11,13 +11,9 @@ export default class UserService extends BaseService {
     email: true,
     phoneNo: true,
     avatar: true,
-    vendor: {
-      select: {
-        id: true,
-      },
-    },
+    vendor: true,
     status: true,
-    admin: { select: { id: true } },
+    admin: true,
     createdAt: true,
     updatedAt: true,
   };
