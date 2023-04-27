@@ -3,7 +3,7 @@ import CustomError from "../Errors/CustomError";
 import { sign, verify, VerifyErrors } from "jsonwebtoken";
 import UnauthenticatedError from "@/Errors/UnauthenticatedError";
 
-const refreshTokenPair = (refreshToken: string): readonly [string, string] => {
+const refreshTokenPair = (refreshToken: string): readonly [string, string, any] => {
   if (!process.env.JWT_SECRETE || !process.env.JWT_REFRESH_TOKEN_SECRETE) {
     throw new CustomError(
       "UNAVAILABLE_SECRETE_KEY",
@@ -45,7 +45,7 @@ const refreshTokenPair = (refreshToken: string): readonly [string, string] => {
     },
     jwtRefreshTokenSecrete
   );
-  return [accessToken, newRefreshToken] as const;
+  return [accessToken, newRefreshToken, decodeUserData] as const;
 };
 
 export default refreshTokenPair;

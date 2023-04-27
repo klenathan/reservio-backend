@@ -58,12 +58,16 @@ export default class AuthController extends BaseController {
         );
       }
 
-      const [accessToken, refreshToken] = refreshTokenPair(
+      const [accessToken, refreshToken, user] = refreshTokenPair(
         req.headers.authorization
       );
-      return res
-        .status(200)
-        .send({ accessToken: accessToken, refreshToken: refreshToken });
+
+      return res.status(200).send({
+        status: "success",
+        user: user,
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+      });
     } catch (e) {
       next(e);
     }
