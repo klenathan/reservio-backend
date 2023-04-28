@@ -30,7 +30,9 @@ export default class ProductController extends BaseController {
 
   getAllProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      return res.send(await this.service.getAllProduct());
+      //productSorting
+      //productFiltering
+      return res.send(await this.service.productFiltering(req.query));
     } catch (e) {
       next(e);
     }

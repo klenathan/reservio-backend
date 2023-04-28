@@ -1,10 +1,14 @@
-import CustomError from "@/Errors/CustomError";
-import handleUploadMultipleProductImage from "@/Utils/HandleImages/handleUploadMultipleProductImage";
 import { Prisma, PrismaClient, Product } from "@prisma/client";
+
 import BaseService from "../Base/BaseService";
+import CustomError from "@/Errors/CustomError";
 import UnauthorizedError from "@/Errors/UnauthorizedError";
-import ICategory from "./Types/ICategory";
+
+import handleUploadMultipleProductImage from "@/Utils/HandleImages/handleUploadMultipleProductImage";
+
+import IProductSort from "./Types/IProductSort";
 import NewProductDTO from "./Types/NewProductDTO";
+import IProductFilter from "./Types/IProductFilter";
 
 export default class ProductService extends BaseService {
   private includeUserConfig = {
@@ -26,26 +30,26 @@ export default class ProductService extends BaseService {
     super(db);
   }
 
-  getAllProduct = async () => {
-    return await this.db.product.findMany({
-      orderBy: {
-        reviews: {
-          _count: "desc",
-        },
-      },
-      include: {
-        vendor: { include: { user: this.includeUserConfig } },
-        ProductFixedTimeSlot: true,
-        reviews: true,
-        _count: {
-          select: {
-            reviews: true,
-            Reservation: true,
-          },
-        },
-      },
-    });
-  };
+  // getAllProduct = async () => {
+  //   return await this.db.product.findMany({
+  //     orderBy: {
+  //       reviews: {
+  //         _count: "desc",
+  //       },
+  //     },
+  //     include: {
+  //       vendor: { include: { user: this.includeUserConfig } },
+  //       ProductFixedTimeSlot: true,
+  //       reviews: true,
+  //       _count: {
+  //         select: {
+  //           reviews: true,
+  //           Reservation: true,
+  //         },
+  //       },
+  //     },
+  //   });
+  // };
 
   getHighlightProduct = async () => {
     return await this.db.product.findMany({
@@ -104,56 +108,178 @@ export default class ProductService extends BaseService {
     return { avgRating: avg, ...product };
   };
 
+  constructFilterOption = (query: any) => {
+    let filter: IProductFilter = {};
+
+    if (query.minPrice) {
+      if (!filter.price) {
+        filter.price = {};
+      }
+      filter.price.gte = query.minPrice;
+    }
+
+    if (query.maxPrice) {
+      if (!filter.price) {
+        filter.price = {};
+      }
+      filter.price.lte = query.maxPrice;
+    }
+
+    if (query.fromDate) {
+      const fromDate = parseInt(query.fromDate);
+      if (!filter.ProductFixedTimeSlot) {
+        filter.ProductFixedTimeSlot = {
+          some: { from: { gte: new Date(fromDate) } },
+        };
+      } else {
+        if (!filter.ProductFixedTimeSlot.some.from) {
+          filter.ProductFixedTimeSlot = {
+            some: { from: { gte: new Date(fromDate) } },
+          };
+        } else {
+          filter.ProductFixedTimeSlot.some.from.gte = new Date(fromDate);
+        }
+      }
+    }
+
+    if (query.toDate) {
+      const toDate = parseInt(query.toDate);
+      if (!filter.ProductFixedTimeSlot) {
+        filter.ProductFixedTimeSlot = {
+          some: { to: { lte: new Date(toDate) } },
+        };
+      } else {
+        if (!filter.ProductFixedTimeSlot.some.to) {
+          filter.ProductFixedTimeSlot = {
+            some: { to: { lte: new Date(toDate) } },
+          };
+        } else {
+          filter.ProductFixedTimeSlot.some.to.lte = new Date(toDate);
+        }
+      }
+    }
+
+    if (query.category) {
+      if (!filter.category) {
+        filter.price = {};
+      }
+      filter.category = query.category;
+    }
+
+    return filter;
+  };
+
+  constructSortingOption = (query: any) => {
+    let sort: IProductSort = {};
+
+    if (query.sortCreatedAt) {
+      sort.createdAt = query.sortCreatedAt as Prisma.SortOrder;
+    }
+
+    if (query.sortName) {
+      sort.name = query.sortName as Prisma.SortOrder;
+    }
+
+    if (query.sortPrice) {
+      sort.price = query.sortPrice as Prisma.SortOrder;
+    }
+    return sort;
+  };
+
+  productFiltering = async (query: any, take?: number) => {
+    const filter = this.constructFilterOption(query);
+    const sort = this.constructSortingOption(query);
+
+    return await this.db.product.findMany({
+      where: {
+        ...filter,
+      },
+      orderBy: sort,
+      take: take || 20,
+      include: {
+        vendor: { include: { user: this.includeUserConfig } },
+        ProductFixedTimeSlot: true,
+        reviews: true,
+        _count: {
+          select: {
+            reviews: true,
+            Reservation: true,
+          },
+        },
+      },
+    });
+  };
+
+  // productSorting = async (query: any, take?: number) => {
+  //   let sort: IProductSort = {};
+
+  //   if (query.createdAt) {
+  //     sort.createdAt = query.createdAt as Prisma.SortOrder;
+  //   }
+
+  //   if (query.name) {
+  //     sort.name = query.name as Prisma.SortOrder;
+  //   }
+
+  //   if (query.price) {
+  //     sort.price = query.price as Prisma.SortOrder;
+  //   }
+
+  //   return await this.db.product.findMany({
+  //     take: take || 20,
+  //     orderBy: {
+  //       ...sort,
+  //     },
+  //     include: {
+  //       vendor: { include: { user: this.includeUserConfig } },
+  //       ProductFixedTimeSlot: true,
+  //       reviews: true,
+  //       _count: {
+  //         select: {
+  //           reviews: true,
+  //           Reservation: true,
+  //         },
+  //       },
+  //     },
+  //   });
+  // };
+
   /**
   Retrieves vendors and products filtered by category.
   @async
   @param {Prisma.EnumCategoryFilter} category - The category to filter by.
-  @returns {Promise<{vendors: Vendor[], products: Product[]}>} An object containing the vendors and products arrays.
+  @returns {Promise<Product[]>} An object containing the vendors and products arrays.
   */
-  getByCategory = async (category: Prisma.EnumCategoryFilter) => {
-    const [vendors, products] = await Promise.all([
-      this.db.vendor.findMany({
-        where: { category: { has: category as any } },
-        include: {
-          user: true,
-          _count: {
-            select: {
-              products: true,
-            },
+  getByCategory = async (
+    category: Prisma.EnumCategoryFilter
+  ): Promise<Product[]> => {
+    const products = this.db.product.findMany({
+      where: { category: category as Prisma.EnumCategoryFilter },
+      include: {
+        reviews: true,
+        vendor: true,
+        ProductFixedTimeSlot: true,
+        _count: {
+          select: {
+            reviews: true,
+            Reservation: true,
           },
         },
-      }),
-      this.db.product.findMany({
-        where: { category: category as Prisma.EnumCategoryFilter },
-        include: {
-          reviews: true,
-          vendor: true,
-          // ProductFixedTimeSlot: true,
-          _count: {
-            select: {
-              reviews: true,
-              Reservation: true,
-            },
-          },
-        },
-      }),
-    ]);
-    return {
-      vendors: vendors,
-      products: products,
-    };
+      },
+    });
+    return products;
   };
 
   /**
    * Creates a new product and uploads images for it
    * @param {NewProductDTO} data - The data for the new product
    * @param {Express.Multer.File[]} images - The images to upload for the product
-   * @returns {Product} A  newly created product
+   * @returns {Promise<Product>} A  newly created product
    */
   createProduct = async (
     data: NewProductDTO,
     images: Express.Multer.File[]
-  ) => {
+  ): Promise<Product> => {
     let result;
 
     // Validate required fields
@@ -172,7 +298,10 @@ export default class ProductService extends BaseService {
 
     // Check if the user is a vendor
     if (!data.user.vendor) {
-      return 0;
+      throw new UnauthorizedError(
+        "NOT_A_VENDOR",
+        `User ${data.user.username} is not a vendor`
+      );
     }
 
     // Create the product based on its type
