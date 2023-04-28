@@ -160,10 +160,11 @@ export default class ProductService extends BaseService {
     }
 
     if (query.category) {
-      if (!filter.category) {
-        filter.price = {};
-      }
       filter.category = query.category;
+    }
+
+    if (query.type) {
+      filter.type = query.type;
     }
 
     return filter;
