@@ -19,7 +19,7 @@ export default class ReservationService extends BaseService {
     createdAt: true,
     updatedAt: true,
   };
-  
+
   private reservationQueryOption = {
     customer: {
       select: this.userQuerySelectConfig,
@@ -61,7 +61,7 @@ export default class ReservationService extends BaseService {
         return r;
       });
 
-    let _: Prisma.ReservationCreateInput;
+    // let _: Prisma.ReservationCreateInput;
 
     if (productQuery.type == "FIXED") {
       return await this.db.reservation.create({

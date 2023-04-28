@@ -214,7 +214,7 @@ export default class ProductService extends BaseService {
           ProductFixedTimeSlot: {
             createMany: {
               data: data.timeSlotConverted.map((slot) => {
-                console.log("From:", new Date(slot.from));
+                // console.log("From:", new Date(slot.from));
 
                 return {
                   from: new Date(slot.from),

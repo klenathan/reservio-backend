@@ -1,6 +1,5 @@
 import BaseService from "@/Modules/Base/BaseService";
 import { Prisma, PrismaClient } from "@prisma/client";
-import { query } from "express";
 
 export default class SeachService extends BaseService {
   constructor(db: PrismaClient) {

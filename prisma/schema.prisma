@@ -120,24 +120,6 @@ enum ReservationStatus {
   FINISHED
 }
 
-// model ProuctReservation {
-//   productId              String
-//   reservationId          String
-//   productFixedTimeSlotId String?
-//   quantity               Int
-//   startAt                DateTime  @default(now())
-//   endAt                  DateTime?
-
-//   product     Product               @relation(fields: [productId], references: [id])
-//   reservation Reservation           @relation(fields: [reservationId], references: [id])
-//   timeSlot    ProductFixedTimeSlot? @relation(fields: [productFixedTimeSlotId], references: [id])
-
-//   createdAt DateTime @default(now()) @map(name: "created_at")
-//   updatedAt DateTime @updatedAt @map(name: "updated_at")
-
-//   @@id([productId, reservationId])
-// }
-
 model Product {
   id       String      @id @default(cuid())
   vendorId String
