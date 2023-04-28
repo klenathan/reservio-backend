@@ -108,6 +108,11 @@ export default class ProductService extends BaseService {
     return { avgRating: avg, ...product };
   };
 
+  /**
+  Construct the filter options for retrieving products based on the query object.
+  @param {Object} query - The query object containing filter options.
+  @returns {Object} - The object containing the filter options for products.
+  */
   constructFilterOption = (query: any) => {
     let filter: IProductFilter = {};
 
@@ -170,6 +175,11 @@ export default class ProductService extends BaseService {
     return filter;
   };
 
+  /**
+  Construct the sorting options for retrieving products based on the query object.
+  @param {Object} query - The query object containing sorting options.
+  @returns {Object} - The object containing the sorting options for products.
+  */
   constructSortingOption = (query: any) => {
     let sort: IProductSort = {};
 
@@ -187,7 +197,16 @@ export default class ProductService extends BaseService {
     return sort;
   };
 
-  productFiltering = async (query: any, take?: number) => {
+  /**
+  Retrieve products based on filter and sorting options.
+  @param {Object} query - The query object containing filter and sorting options.
+  @param {number} [take=20] - The number of products to retrieve.
+  @returns {Promise<Array<Product>>} - The array of products that match the filter and sorting options.
+  */
+  productFiltering = async (
+    query: any,
+    take?: number
+  ): Promise<Array<Product>> => {
     const filter = this.constructFilterOption(query);
     const sort = this.constructSortingOption(query);
 
@@ -210,40 +229,6 @@ export default class ProductService extends BaseService {
       },
     });
   };
-
-  // productSorting = async (query: any, take?: number) => {
-  //   let sort: IProductSort = {};
-
-  //   if (query.createdAt) {
-  //     sort.createdAt = query.createdAt as Prisma.SortOrder;
-  //   }
-
-  //   if (query.name) {
-  //     sort.name = query.name as Prisma.SortOrder;
-  //   }
-
-  //   if (query.price) {
-  //     sort.price = query.price as Prisma.SortOrder;
-  //   }
-
-  //   return await this.db.product.findMany({
-  //     take: take || 20,
-  //     orderBy: {
-  //       ...sort,
-  //     },
-  //     include: {
-  //       vendor: { include: { user: this.includeUserConfig } },
-  //       ProductFixedTimeSlot: true,
-  //       reviews: true,
-  //       _count: {
-  //         select: {
-  //           reviews: true,
-  //           Reservation: true,
-  //         },
-  //       },
-  //     },
-  //   });
-  // };
 
   /**
   Retrieves vendors and products filtered by category.
@@ -327,6 +312,7 @@ export default class ProductService extends BaseService {
           422
         );
       }
+
       data.timeSlotConverted = data.timeSlot.map((slot) => {
         return JSON.parse(slot);
       });
