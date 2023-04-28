@@ -15,6 +15,12 @@ export default class ProductRouter extends BaseRouter {
     this.router.get("/highlight", productController.getHighlightProduct);
     this.router.get("/discount", productController.getAllDiscount);
     this.router.post("/", JWTValidatorMiddleware, productController.newProduct);
+    this.router.post(
+      "/discount",
+      JWTValidatorMiddleware,
+      productController.newDiscount
+    );
+
     this.router.get("/category/:category", productController.getByCategory);
     this.router.get(
       "/:id",

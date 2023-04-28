@@ -125,4 +125,28 @@ export default class ProductController extends BaseController {
       next(e);
     }
   };
+
+  newDiscount = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.body.user.admin) {
+        
+        throw new UnauthorizedError(
+          "UNAUTHORIZED",
+          `${req.body.user.username} is not admin, only admin can create new discount`
+        );
+      }
+
+      if (!req.files) {
+        throw new CustomError("MISSING_IMG", "Missing discount images", 422);
+      }
+
+      const image: Express.Multer.File[] = req.files as Express.Multer.File[];
+
+      return res
+        .status(200)
+        .send(await this.service.createNewDiscount(req.body, image[0]));
+    } catch (e) {
+      next(e);
+    }
+  };
 }

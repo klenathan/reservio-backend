@@ -9,6 +9,8 @@ import handleUploadMultipleProductImage from "@/Utils/HandleImages/handleUploadM
 import IProductSort from "./Types/IProductSort";
 import NewProductDTO from "./Types/NewProductDTO";
 import IProductFilter from "./Types/IProductFilter";
+import NewDiscountDTO from "./Types/NewDiscountDTO";
+import handleUploadSingle from "@/Utils/HandleImages/handleUploadSingle";
 
 export default class ProductService extends BaseService {
   private includeUserConfig = {
@@ -279,9 +281,6 @@ export default class ProductService extends BaseService {
       );
     }
 
-    // Upload product images
-    const imagesUploaded = await handleUploadMultipleProductImage(images);
-
     // Check if the user is a vendor
     if (!data.user.vendor) {
       throw new UnauthorizedError(
@@ -289,6 +288,9 @@ export default class ProductService extends BaseService {
         `User ${data.user.username} is not a vendor`
       );
     }
+
+    // Upload product images
+    const imagesUploaded = await handleUploadMultipleProductImage(images);
 
     // Create the product based on its type
     if (data.type === "FLEXIBLE") {
@@ -360,10 +362,6 @@ export default class ProductService extends BaseService {
     return result;
   };
 
-  getAllDiscount = async () => {
-    return await this.db.discount.findMany();
-  };
-
   updateProduct = async (
     id: string,
     vendorID: string,
@@ -386,5 +384,41 @@ export default class ProductService extends BaseService {
       where: { id: id },
       data: data,
     });
+  };
+
+  getAllDiscount = async () => {
+    return await this.db.discount.findMany();
+  };
+
+  createNewDiscount = async (
+    data: NewDiscountDTO,
+    image: Express.Multer.File
+  ) => {
+    // Upload product images
+    const imagesUploaded = await handleUploadSingle(image);
+
+    data.image = imagesUploaded;
+
+    if (data.id) {
+      let { user, amount, start, end, ...writeData } = data;
+      return await this.db.discount.create({
+        data: {
+          ...writeData,
+          amount: parseInt(amount),
+          start: new Date(parseInt(start)),
+          end: new Date(parseInt(end)),
+        },
+      });
+    } else {
+      let { id, user, amount, start, end, ...writeData } = data;
+      return await this.db.discount.create({
+        data: {
+          ...writeData,
+          amount: parseInt(amount),
+          start: new Date(parseInt(start)),
+          end: new Date(parseInt(end)),
+        },
+      });
+    }
   };
 }
