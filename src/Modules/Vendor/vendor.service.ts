@@ -2,6 +2,7 @@ import CustomError from "@/Errors/CustomError";
 import { Prisma, PrismaClient } from "@prisma/client";
 import BaseService from "../Base/BaseService";
 import DTORequestVendor from "./types/DTORequestVendor";
+import NotFoundError from "@/Errors/NotFoundError";
 
 export default class VendorService extends BaseService {
   private includeUserConfig = {
@@ -56,18 +57,29 @@ export default class VendorService extends BaseService {
 
   requestNewVendor = async (data: DTORequestVendor) => {
     let username = data.user.username;
-    let vendorCheck = await this.db.vendor.findFirst({
+
+    let vendorCheck = await this.db.user.findFirst({
       where: { username: username },
+      include: { vendor: true },
     });
-    if (vendorCheck) {
+
+    if (!vendorCheck) {
+      throw new NotFoundError("USER_NOT_FOUND", `${username} cannot be found`);
+    }
+
+    if (vendorCheck.vendor) {
       throw new CustomError(
         "VENDOR_EXIST",
         `Vendor '@${username}' has already exist`,
         422
       );
     }
+
+    let vendorPhone = data.phone ?? vendorCheck.phoneNo;
+
     return await this.db.vendor.create({
       data: {
+        phone: vendorPhone,
         name: data.name,
         username: data.user.username,
         desc: data.desc || "",
