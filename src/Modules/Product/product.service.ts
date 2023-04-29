@@ -294,14 +294,22 @@ export default class ProductService extends BaseService {
 
     // Create the product based on its type
     if (data.type === "FLEXIBLE") {
+      if (!data.quantity) {
+        throw new CustomError(
+          "INVALID_INPUT",
+          "Missing 'quantity' from request",
+          422
+        );
+      }
       result = await this.db.product.create({
         data: {
           vendor: { connect: { id: data.user.vendor.id } },
           name: data.name,
           images: imagesUploaded,
           category: data.category,
-          address: data.address || "RMIT University Vietnam",
+          address: data.address || "Ho Chi Minh city",
           price: parseInt(data.price as unknown as string),
+          quantity: parseInt(data.quantity as any),
           desc: data.desc || "",
           type: data.type,
         },
@@ -327,13 +335,20 @@ export default class ProductService extends BaseService {
           500
         );
       }
+
       result = await this.db.product.create({
         data: {
           vendor: { connect: { id: data.user.vendor.id } },
           ProductFixedTimeSlot: {
             createMany: {
               data: data.timeSlotConverted.map((slot) => {
-                // console.log("From:", new Date(slot.from));
+                if (!slot.quantity) {
+                  throw new CustomError(
+                    "MISSING_FIELD",
+                    "'quantity' is required",
+                    500
+                  );
+                }
                 return {
                   from: new Date(slot.from),
                   to: new Date(slot.to),
@@ -345,10 +360,11 @@ export default class ProductService extends BaseService {
           name: data.name,
           images: imagesUploaded,
           category: data.category,
-          address: data.address || "RMIT University Vietnam",
+          address: data.address || "Ho Chi Minh city",
           price: parseInt(data.price as unknown as string),
           desc: data.desc || "",
           type: data.type,
+          quantity: 0,
         },
         include: { vendor: true, ProductFixedTimeSlot: true },
       });
