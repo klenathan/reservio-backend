@@ -34,18 +34,69 @@ export default class VendorService extends BaseService {
   };
 
   getVendorByUsername = async (username: string) => {
-    return await this.db.vendor.findUniqueOrThrow({
-      where: {
-        username: username,
-      },
-      include: {
-        user: this.includeUserConfig,
-        products: true,
-        _count: {
-          select: { products: true },
+    interface reviewGetResult {
+      id: string;
+      username: string;
+      avg: number;
+      count: number;
+    }
+
+    const getVendor = async () => {
+      let res = this.db.vendor.findUniqueOrThrow({
+        where: {
+          username: username,
         },
-      },
-    });
+        include: {
+          user: this.includeUserConfig,
+          products: {
+            include: {
+              reviews: true,
+            },
+          },
+          _count: {
+            select: { products: true },
+          },
+        },
+      });
+      return res;
+    };
+
+    const getAvgRating = async () => {
+      return this.db.$queryRaw`
+        select 
+        "Vendor"."id",
+        "Vendor"."username",
+        AVG("rating"), COUNT("rating") from "Review" 
+        inner join "Product" on "productId" = "Product".id
+        inner join "Vendor" on "vendorId" = "Vendor".id
+        where "Vendor".username = ${username}
+        group by "Vendor".id
+        `.then((r: any) => {
+        if (r.length == 0) {
+          return {
+            id: "asd",
+            username: "asd",
+            avg: 0,
+            count: 0,
+          };
+        } else {
+          r[0].count = Number(r[0].count) ?? 0;
+          return r[0] as reviewGetResult;
+        }
+      });
+    };
+
+    const [avgRating, vendor] = await Promise.all([
+      getAvgRating(),
+      getVendor(),
+    ]);
+
+    // return vendor;
+
+    return {
+      rating: { _avg: avgRating.avg, _count: avgRating.count },
+      ...vendor,
+    };
   };
 
   updateVendorData = async (id: string, data: Prisma.VendorUpdateInput) => {

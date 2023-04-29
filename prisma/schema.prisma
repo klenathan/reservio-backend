@@ -63,6 +63,8 @@ model Vendor {
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 }
 
+
+
 enum VendorStatus {
   PENDING
   ACCEPTED
