@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient, Discount } from "@prisma/client";
 import BaseService from "../Base/BaseService";
 import DTOAddToCart from "./types/DTOAddToCart";
 import DTONewReservation from "./types/DTONewReservation";
@@ -46,29 +46,59 @@ export default class ReservationService extends BaseService {
 
   /////// TODO: Implement discount
   newReservation = async (data: DTONewReservation) => {
-    let productQuery = await this.db.product
-      .findFirstOrThrow({
-        where: { id: data.productId },
-        include: { ProductFixedTimeSlot: true },
-      })
-      .then((r) => {
-        if (!r) {
-          throw new NotFoundError(
-            "PRODUCT_NOT_FOUND",
-            `${data.productId} cannot be found`
-          );
-        }
-        return r;
-      });
+    /// querey
+    let productQuery = async () =>
+      this.db.product
+        .findFirstOrThrow({
+          where: { id: data.productId },
+          include: { ProductFixedTimeSlot: true },
+        })
+        .then((r) => {
+          if (!r) {
+            throw new NotFoundError(
+              "PRODUCT_NOT_FOUND",
+              `${data.productId} cannot be found`
+            );
+          }
+          return r;
+        });
 
-    // let _: Prisma.ReservationCreateInput;
+    let discountQuery = async () => {
+      if (!data.discountId) {
+        return 0;
+      }
+      return await this.db.discount
+        .findFirstOrThrow({
+          where: { id: data.discountId },
+        })
+        .then((r) => {
+          return r.amount;
+        });
+    };
 
-    if (productQuery.type == "FIXED") {
+    const [productResult, discountRate] = await Promise.all([
+      productQuery(),
+      discountQuery(),
+    ]);
+
+    if (productResult.type == "FIXED") {
+      let totalBill = Math.ceil(
+        parseInt(data.quantity) *
+          productResult.price *
+          ((100 - discountRate) / 100)
+      );
+      if (totalBill > 2147483647) {
+        throw new CustomError(
+          "ORDER_TOO_LARGE",
+          "The order is too large to handle. Please contact customer service",
+          500
+        );
+      }
       return await this.db.reservation.create({
         data: {
           customer: { connect: { username: data.user.username } },
-          total: data.quantity * productQuery.price,
-          quantity: data.quantity,
+          total: totalBill,
+          quantity: parseInt(data.quantity),
           Product: { connect: { id: data.productId } },
           ProductFixedTimeSlot: {
             connect: { id: data.productFixedTimeSlotId },
@@ -87,17 +117,26 @@ export default class ReservationService extends BaseService {
         400
       );
     }
-    let startTime = new Date(data.startAt);
-    let endTime = new Date(data.endAt);
-
+    let startTime = new Date(parseInt(data.startAt));
+    let endTime = new Date(parseInt(data.endAt));
+    let totalBill = Math.ceil(
+      parseInt(data.quantity) *
+        productResult.price *
+        ((100 - discountRate) / 100) *
+        Math.ceil((endTime.getTime() - startTime.getTime()) / 3600000)
+    );
+    if (totalBill > 2147483647) {
+      throw new CustomError(
+        "ORDER_TOO_LARGE",
+        "The order is too large to handle. Please contact customer service",
+        500
+      );
+    }
     return await this.db.reservation.create({
       data: {
         customer: { connect: { username: data.user.username } },
-        total:
-          data.quantity *
-          productQuery.price *
-          (Math.abs(endTime.getTime() - startTime.getTime()) / 3600000),
-        quantity: data.quantity,
+        total: totalBill,
+        quantity: parseInt(data.quantity),
         Product: { connect: { id: data.productId } },
         startAt: startTime,
         endAt: endTime,

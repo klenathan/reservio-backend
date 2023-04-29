@@ -27,7 +27,7 @@ export default class ReservationController extends BaseController {
 
   newReservation = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!(req.body.user && req.body.products)) {
+      if (!(req.body.user && req.body.productId && req.body.quantity)) {
         throw new CustomError(
           "INVALID_REQUEST",
           "Missing arguements from request",

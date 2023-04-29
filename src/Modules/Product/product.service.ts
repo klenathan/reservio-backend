@@ -122,14 +122,14 @@ export default class ProductService extends BaseService {
       if (!filter.price) {
         filter.price = {};
       }
-      filter.price.gte = query.minPrice;
+      filter.price.gte = parseInt(query.minPrice);
     }
 
     if (query.maxPrice) {
       if (!filter.price) {
         filter.price = {};
       }
-      filter.price.lte = query.maxPrice;
+      filter.price.lte = parseInt(query.maxPrice);
     }
 
     if (query.fromDate) {
@@ -299,6 +299,7 @@ export default class ProductService extends BaseService {
           vendor: { connect: { id: data.user.vendor.id } },
           name: data.name,
           images: imagesUploaded,
+          category: data.category,
           address: data.address || "RMIT University Vietnam",
           price: parseInt(data.price as unknown as string),
           desc: data.desc || "",
@@ -333,7 +334,6 @@ export default class ProductService extends BaseService {
             createMany: {
               data: data.timeSlotConverted.map((slot) => {
                 // console.log("From:", new Date(slot.from));
-
                 return {
                   from: new Date(slot.from),
                   to: new Date(slot.to),
@@ -344,6 +344,7 @@ export default class ProductService extends BaseService {
           },
           name: data.name,
           images: imagesUploaded,
+          category: data.category,
           address: data.address || "RMIT University Vietnam",
           price: parseInt(data.price as unknown as string),
           desc: data.desc || "",
