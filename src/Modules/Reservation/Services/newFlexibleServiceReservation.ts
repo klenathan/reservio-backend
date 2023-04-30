@@ -1,4 +1,10 @@
-import { PrismaClient, Product, Reservation } from "@prisma/client";
+import {
+  Prisma,
+  PrismaClient,
+  Product,
+  ProductPayload,
+  Reservation,
+} from "@prisma/client";
 import DTONewReservation from "../types/DTONewReservation";
 import CustomError from "@/Errors/CustomError";
 
@@ -26,7 +32,9 @@ const reservationQueryOption = {
 export default async function newFlexibleServiceReservation(
   db: PrismaClient,
   data: DTONewReservation,
-  productResult: Product & { Reservation: Reservation[] },
+  productResult: Prisma.ProductGetPayload<{
+    include: { Reservation: true };
+  }>,
   discountRate: number
 ) {
   if (!data.startAt || !data.endAt) {

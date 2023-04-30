@@ -1,4 +1,9 @@
-import { Prisma, PrismaClient, Discount } from "@prisma/client";
+import {
+  Prisma,
+  PrismaClient,
+  Discount,
+  ProductFixedTimeSlot,
+} from "@prisma/client";
 import BaseService from "../Base/BaseService";
 import DTOAddToCart from "./types/DTOAddToCart";
 import DTONewReservation from "./types/DTONewReservation";
@@ -64,7 +69,7 @@ export default class ReservationService extends BaseService {
       }
     };
 
-    let productQuery = async (): Promise<any> =>
+    let productQuery = async () =>
       this.db.product
         .findFirstOrThrow({
           where: {
@@ -110,7 +115,9 @@ export default class ReservationService extends BaseService {
       return await newFlexibleServiceReservation(
         this.db,
         data,
-        productResult,
+        productResult as Prisma.ProductGetPayload<{
+          include: { Reservation: true };
+        }>,
         discountRate
       );
     }
