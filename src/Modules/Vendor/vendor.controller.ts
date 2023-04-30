@@ -9,6 +9,7 @@ import CustomError from "@/Errors/CustomError";
 
 export default class VendorController extends BaseController {
   declare service: VendorService;
+  
   public constructor(db: PrismaClient) {
     super(db);
     this.service = new VendorService(this.db);
@@ -31,6 +32,20 @@ export default class VendorController extends BaseController {
     try {
       const username = req.params.id;
       let result = await this.service.getVendorByUsername(username);
+      return res.status(200).send(result);
+    } catch (e) {
+      next(e);
+    }
+  };
+
+  getVendorReportByUsername = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const username = req.params.id;
+      let result = await this.service.getVendorReportByUsername(username);
       return res.status(200).send(result);
     } catch (e) {
       next(e);

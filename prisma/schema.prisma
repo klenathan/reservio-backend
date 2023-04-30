@@ -64,7 +64,6 @@ model Vendor {
 }
 
 
-
 enum VendorStatus {
   PENDING
   ACCEPTED

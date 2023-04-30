@@ -27,7 +27,16 @@ export default class VendorService extends BaseService {
 
   getAllVendor = async () => {
     return await this.db.vendor.findMany({
-      include: {
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        userId: true,
+        certified: true,
+        status: true,
+        phone: true,
+        desc: true,
+        category: false,
         user: this.includeUserConfig,
       },
     });
@@ -99,14 +108,14 @@ export default class VendorService extends BaseService {
       });
       return avgRating;
     };
-    
-    console.time()
+
+    console.time();
     const [avgRating, vendor, category] = await Promise.all([
       getAvgRating(),
       getVendor(),
       getVendorCategory(),
     ]);
-    console.timeEnd()
+    console.timeEnd();
     return {
       rating: { _avg: avgRating.avg, _count: avgRating.count },
       ...vendor,
@@ -152,5 +161,170 @@ export default class VendorService extends BaseService {
         user: { connect: { username: username } },
       },
     });
+  };
+
+  // "Vendor".username,
+  // "Vendor".certified,
+  // "Vendor".status,
+  // "Vendor".desc,
+  // "Vendor".created_at,
+  // "Vendor".updated_at,
+  // "Vendor".name,
+  // "Vendor".phone
+
+  getRevenuetFromUsernameByCategory = async (
+    username: string,
+    beginDate: Date
+  ) => {
+    return await this.db.$queryRaw`
+        select 
+        "Product".category,
+        avg(total),
+        sum(total),
+        "Vendor".id
+        from "Vendor" 
+        inner join "Product" on "Vendor".id = "Product"."vendorId"
+        inner join "Reservation" on "Reservation"."productId" = "Product".id
+        where "Vendor".username = ${username}
+        and "Reservation".updated_at > ${beginDate}
+        group by "Product".category, "Vendor".id`.then((r: any) => {
+      if (r.length > 0) {
+        return r.map((each: any) => {
+          each.avg = parseFloat(each.avg);
+          each.sum = parseInt(each.sum);
+          return each;
+        });
+      } else return [];
+    });
+  };
+
+  getRevenuetFromUsernameByProduct = async (
+    username: string,
+    beginDate: Date
+  ) => {
+    return await this.db.$queryRaw`
+        select 
+        "Product".*,
+        avg(total),
+        sum(total)
+        from "Vendor" 
+        inner join "Product" on "Vendor".id = "Product"."vendorId"
+        inner join "Reservation" on "Reservation"."productId" = "Product".id
+        where "Vendor".username = ${username}
+        and "Reservation".updated_at > ${beginDate}
+        group by "Product".id`.then((r: any) => {
+      if (r.length > 0) {
+        return r.map((each: any) => {
+          each.avg = parseFloat(each.avg);
+          each.sum = parseInt(each.sum);
+          return each;
+        });
+      } else return [];
+    });
+  };
+
+  getVendorMetrics = async (username: string, beginDate: Date) => {
+    console.time("get metrics");
+
+    const metrics = await this.db.$queryRaw`
+        select 
+        "Vendor".id,
+          avg(total),
+          sum(total)
+          from "Vendor" 
+          inner join "Product" on "Vendor".id = "Product"."vendorId"
+          inner join "Reservation" on "Reservation"."productId" = "Product".id
+          where "Vendor".username = ${username}
+          and "Reservation".updated_at > ${beginDate}
+          group by "Vendor".id`.then((r: any) => {
+      if (r.length > 0) {
+        return r.map((each: any) => {
+          each.avg = parseFloat(each.avg);
+          each.sum = parseInt(each.sum);
+          return each;
+        })[0];
+      } else return [];
+    });
+    console.timeEnd("get metrics");
+    return metrics;
+  };
+
+  getVendor = async (username: string) => {
+    console.time("get vendor");
+    const vendor = await this.db.vendor.findUniqueOrThrow({
+      where: {
+        username: username,
+      },
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        userId: true,
+        certified: true,
+        status: true,
+        phone: true,
+        desc: true,
+        category: false,
+        user: this.includeUserConfig,
+        _count: {
+          select: { products: true },
+        },
+      },
+    });
+    console.timeEnd("get vendor");
+    return vendor;
+  };
+
+  getRevenuetFromUsernameByDay = async (username: string, beginDate: Date) => {
+    console.time("get metrics by day");
+    const metrics = await this.db.$queryRaw`
+        select 
+        date_trunc('day', "Reservation".created_at) as "day",
+        avg(total),
+        sum(total)
+        from "Vendor" 
+        inner join "Product" on "Vendor".id = "Product"."vendorId"
+        inner join "Reservation" on "Reservation"."productId" = "Product".id
+        where "Vendor".username = ${username}
+        and "Reservation".updated_at > ${beginDate}
+        group by 1
+      `.then((r: any) => {
+      if (r.length > 0) {
+        return r.map((each: any) => {
+          each.avg = parseFloat(each.avg);
+          each.sum = parseInt(each.sum);
+          return each;
+        });
+      } else return [];
+    });
+    console.timeEnd("get metrics by day");
+    return metrics;
+  };
+
+  getVendorReportByUsername = async (username: string) => {
+    console.time("get report");
+    const today = new Date().setUTCHours(0, 0, 0, 0) - 1000 * 3600 * 7;
+    const beginDate: Date = new Date(today - 1000 * 3600 * 24 * 7);
+    const [vendor, metrics, productRevenue, categoryRevenue, revenueByDay] =
+      await Promise.all([
+        this.getVendor(username),
+        this.getVendorMetrics(username, beginDate),
+        this.getRevenuetFromUsernameByProduct(username, beginDate),
+        this.getRevenuetFromUsernameByCategory(username, beginDate),
+        this.getRevenuetFromUsernameByDay(username, beginDate),
+      ]);
+    let result: any = {
+      timeframe: {
+        from: beginDate,
+        to: new Date(),
+      },
+      vendor: vendor,
+      metrics: metrics,
+      productRevenue: productRevenue,
+      revenueByDay: revenueByDay,
+      categoryRevenue: categoryRevenue,
+    };
+    console.timeEnd("get report");
+    return result;
   };
 }

@@ -13,12 +13,14 @@ export default class VendorRouter extends BaseRouter {
     let vendorController = new VendorController(db);
 
     this.router.get("/", vendorController.getAllVendor);
+
     this.router.post(
       "/",
       JWTValidatorMiddleware,
       vendorController.requestNewVendor
     );
     this.router.get("/:id", vendorController.getVendorByUsername);
+    this.router.get("/:id/report", vendorController.getVendorReportByUsername);
     this.router.put(
       "/",
       JWTValidatorMiddlewareNonUser,
