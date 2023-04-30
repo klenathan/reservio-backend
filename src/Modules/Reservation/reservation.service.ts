@@ -4,7 +4,9 @@ import DTOAddToCart from "./types/DTOAddToCart";
 import DTONewReservation from "./types/DTONewReservation";
 import NotFoundError from "@/Errors/NotFoundError";
 import CustomError from "@/Errors/CustomError";
-import { log } from "console";
+
+import newFixedServiceReservation from "./Services/newFixedServiceReservation";
+import newFlexibleServiceReservation from "./Services/newFlexibleServiceReservation";
 
 export default class ReservationService extends BaseService {
   private userQuerySelectConfig = {
@@ -44,14 +46,43 @@ export default class ReservationService extends BaseService {
     });
   };
 
-  /////// TODO: Implement discount
   newReservation = async (data: DTONewReservation) => {
-    /// querey
-    let productQuery = async () =>
+    // query
+    let configForFlexibleService: any = () => {
+      if (data.startAt && data.endAt) {
+        return (configForFlexibleService = {
+          where: {
+            Reservation: {
+              every: {
+                startAt: new Date(parseInt(data.startAt)),
+                endAt: new Date(parseInt(data.endAt)),
+              },
+            },
+          },
+          include: { Reservation: true },
+        });
+      }
+    };
+
+    let productQuery = async (): Promise<any> =>
       this.db.product
         .findFirstOrThrow({
-          where: { id: data.productId },
-          include: { ProductFixedTimeSlot: true },
+          where: {
+            id: data.productId,
+          },
+          include: {
+            Reservation: true,
+            ProductFixedTimeSlot: {
+              include: {
+                ProuctReservation: true,
+                _count: true,
+              },
+            },
+            _count: {
+              select: { Reservation: true },
+            },
+          },
+          ...configForFlexibleService,
         })
         .then((r) => {
           if (!r) {
@@ -63,86 +94,39 @@ export default class ReservationService extends BaseService {
           return r;
         });
 
-    let discountQuery = async () => {
-      if (!data.discountId) {
-        return 0;
-      }
-      return await this.db.discount
-        .findFirstOrThrow({
-          where: { id: data.discountId },
-        })
-        .then((r) => {
-          return r.amount;
-        });
-    };
-
     const [productResult, discountRate] = await Promise.all([
       productQuery(),
-      discountQuery(),
+      this.getDiscountRate(data.discountId),
     ]);
 
     if (productResult.type == "FIXED") {
-      let totalBill = Math.ceil(
-        parseInt(data.quantity) *
-          productResult.price *
-          ((100 - discountRate) / 100)
+      return await newFixedServiceReservation(
+        this.db,
+        data,
+        productResult,
+        discountRate
       );
-      if (totalBill > 2147483647) {
-        throw new CustomError(
-          "ORDER_TOO_LARGE",
-          "The order is too large to handle. Please contact customer service",
-          500
-        );
-      }
-      return await this.db.reservation.create({
-        data: {
-          customer: { connect: { username: data.user.username } },
-          total: totalBill,
-          quantity: parseInt(data.quantity),
-          Product: { connect: { id: data.productId } },
-          ProductFixedTimeSlot: {
-            connect: { id: data.productFixedTimeSlotId },
-          },
-        },
-        include: this.reservationQueryOption,
-      });
+    } else {
+      return await newFlexibleServiceReservation(
+        this.db,
+        data,
+        productResult,
+        discountRate
+      );
     }
+  };
 
-    //// If the Service is flexible time,
-    //// 'ProductFixedTimeSlot' attribute is not needed
-    if (!data.startAt || !data.endAt) {
-      throw new CustomError(
-        "INVALID_INPUT",
-        "Flexible Service need to include 'startAt' and 'endAt'",
-        400
-      );
+  getDiscountRate = async (discountId: string | undefined) => {
+    if (!discountId) {
+      return 0;
     }
-    let startTime = new Date(parseInt(data.startAt));
-    let endTime = new Date(parseInt(data.endAt));
-    let totalBill = Math.ceil(
-      parseInt(data.quantity) *
-        productResult.price *
-        ((100 - discountRate) / 100) *
-        Math.ceil((endTime.getTime() - startTime.getTime()) / 3600000)
-    );
-    if (totalBill > 2147483647) {
-      throw new CustomError(
-        "ORDER_TOO_LARGE",
-        "The order is too large to handle. Please contact customer service",
-        500
-      );
-    }
-    return await this.db.reservation.create({
-      data: {
-        customer: { connect: { username: data.user.username } },
-        total: totalBill,
-        quantity: parseInt(data.quantity),
-        Product: { connect: { id: data.productId } },
-        startAt: startTime,
-        endAt: endTime,
-      },
-      include: this.reservationQueryOption,
-    });
+    return await this.db.discount
+      .findFirstOrThrow({
+        where: { id: discountId },
+      })
+      .then((r) => {
+        return r.amount;
+      });
   };
 
   updateReservationStatus = async (

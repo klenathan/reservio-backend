@@ -63,7 +63,6 @@ model Vendor {
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 }
 
-
 enum VendorStatus {
   PENDING
   ACCEPTED
@@ -83,9 +82,9 @@ model Ledger {
   id        String   @id @default(cuid())
   timestamp DateTime @default(now())
   path      String
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  category  Category
+  ip        String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
 }
 
 model Reservation {

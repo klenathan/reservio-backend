@@ -305,7 +305,7 @@ export default class VendorService extends BaseService {
     console.time("get report");
     const today = new Date().setUTCHours(0, 0, 0, 0) - 1000 * 3600 * 7;
     const beginDate: Date = new Date(today - 1000 * 3600 * 24 * 7);
-    const [vendor, metrics, productRevenue, categoryRevenue, revenueByDay] =
+    const [vendor, metrics, revenueByProduct, revenueByCategory, revenueByDay] =
       await Promise.all([
         this.getVendor(username),
         this.getVendorMetrics(username, beginDate),
@@ -320,9 +320,9 @@ export default class VendorService extends BaseService {
       },
       vendor: vendor,
       metrics: metrics,
-      productRevenue: productRevenue,
+      revenueByProduct: revenueByProduct,
       revenueByDay: revenueByDay,
-      categoryRevenue: categoryRevenue,
+      revenueByCategory: revenueByCategory,
     };
     console.timeEnd("get report");
     return result;

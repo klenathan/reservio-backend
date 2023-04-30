@@ -86,7 +86,11 @@ export default class ProductService extends BaseService {
       where: { id: id },
       include: {
         vendor: { include: { user: this.includeUserConfig } },
-        ProductFixedTimeSlot: true,
+        ProductFixedTimeSlot: {
+          include: {
+            _count: true,
+          },
+        },
         reviews: {
           include: { user: this.includeUserConfig },
         },
@@ -94,6 +98,7 @@ export default class ProductService extends BaseService {
           select: {
             reviews: true,
             Reservation: true,
+            ProductFixedTimeSlot: true,
           },
         },
       },

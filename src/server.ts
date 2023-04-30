@@ -1,9 +1,6 @@
 ////// Dependencies
 import { PrismaClient } from "@prisma/client";
-import {
-  PrismaClientKnownRequestError,
-  PrismaClientUnknownRequestError,
-} from "@prisma/client/runtime/library";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import cors from "cors";
 import express, {
   Application,
@@ -28,6 +25,7 @@ import VendorRouter from "./Modules/Vendor/vendor.routes";
 import SearchRouter from "./Modules/Search/search.routes";
 import ReservationRouter from "./Modules/Reservation/reservation.routes";
 import ReviewRouter from "./Modules/Review/review.routes";
+import trafficLogMiddleware from "./Middlewares/trafficLogMiddleware";
 
 export default class ReservioServer {
   public instance: Application;
@@ -40,11 +38,11 @@ export default class ReservioServer {
     typeof http.ServerResponse
   >;
 
-  public constructor(PORT: number) {
+  public constructor(PORT: number, db: PrismaClient) {
     this.instance = express();
     this.httpServer = createServer(this.instance);
     this.PORT = PORT;
-    this.db = new PrismaClient({ errorFormat: "minimal" });
+    this.db = db;
 
     this.middleware();
     this.routing();
@@ -70,6 +68,7 @@ export default class ReservioServer {
     this.instance.use(express.urlencoded({ extended: true }));
 
     this.instance.use(upload.any());
+    this.instance.use(trafficLogMiddleware);
   }
 
   private routing() {
