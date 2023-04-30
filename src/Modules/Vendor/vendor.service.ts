@@ -42,7 +42,7 @@ export default class VendorService extends BaseService {
     }
 
     const getVendor = async () => {
-      let res = this.db.vendor.findUniqueOrThrow({
+      const res = this.db.vendor.findUniqueOrThrow({
         where: {
           username: username,
         },
@@ -61,8 +61,21 @@ export default class VendorService extends BaseService {
       return res;
     };
 
+    const getVendorCategory = async () => {
+      const categories = this.db.$queryRaw`
+          select 
+          distinct "Product".category
+          from "Product" 
+          inner join "Vendor" on "vendorId" = "Vendor".id
+          where "Vendor".username = ${username}`.then((r: any) => {
+        if (r.length > 0) return r.map((cate: any) => cate.category);
+        else return [];
+      });
+      return categories;
+    };
+
     const getAvgRating = async () => {
-      return this.db.$queryRaw`
+      const avgRating = this.db.$queryRaw`
         select 
         "Vendor"."id",
         "Vendor"."username",
@@ -80,22 +93,24 @@ export default class VendorService extends BaseService {
             count: 0,
           };
         } else {
-          r[0].count = Number(r[0].count) ?? 0;
+          r[0].count = parseInt(r[0].count) ?? 0;
           return r[0] as reviewGetResult;
         }
       });
+      return avgRating;
     };
-
-    const [avgRating, vendor] = await Promise.all([
+    
+    console.time()
+    const [avgRating, vendor, category] = await Promise.all([
       getAvgRating(),
       getVendor(),
+      getVendorCategory(),
     ]);
-
-    // return vendor;
-
+    console.timeEnd()
     return {
       rating: { _avg: avgRating.avg, _count: avgRating.count },
       ...vendor,
+      category: category,
     };
   };
 
