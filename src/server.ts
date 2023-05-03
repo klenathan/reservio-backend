@@ -26,6 +26,7 @@ import SearchRouter from "./Modules/Search/search.routes";
 import ReservationRouter from "./Modules/Reservation/reservation.routes";
 import ReviewRouter from "./Modules/Review/review.routes";
 import trafficLogMiddleware from "./Middlewares/trafficLogMiddleware";
+import AdminRouter from "./Modules/Admin/admin.routes";
 
 export default class ReservioServer {
   public instance: Application;
@@ -86,6 +87,7 @@ export default class ReservioServer {
     this.instance.use("/auth", new AuthRouter(this.db).router);
     this.instance.use("/user", new UserRouter(this.db).router);
     this.instance.use("/vendor", new VendorRouter(this.db).router);
+    this.instance.use("/admin", new AdminRouter(this.db).router);
     this.instance.use("/service", new ProductRouter(this.db).router);
     this.instance.use("/reservation", new ReservationRouter(this.db).router);
     this.instance.use("/search", new SearchRouter(this.db).router);

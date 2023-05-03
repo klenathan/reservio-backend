@@ -27,16 +27,7 @@ export default class VendorService extends BaseService {
 
   getAllVendor = async () => {
     return await this.db.vendor.findMany({
-      select: {
-        id: true,
-        username: true,
-        name: true,
-        userId: true,
-        certified: true,
-        status: true,
-        phone: true,
-        desc: true,
-        category: false,
+      include: {
         user: this.includeUserConfig,
       },
     });
