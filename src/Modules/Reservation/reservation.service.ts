@@ -112,6 +112,8 @@ export default class ReservationService extends BaseService {
         discountRate
       );
     } else {
+      ////// For flexible product
+      
       return await newFlexibleServiceReservation(
         this.db,
         data,

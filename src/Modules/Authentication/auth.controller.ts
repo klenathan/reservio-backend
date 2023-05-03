@@ -57,17 +57,6 @@ export default class AuthController extends BaseController {
           "Auth token cannot be found on request header"
         );
       }
-
-      // const [accessToken, refreshToken, user] = refreshTokenPair(
-      //   req.headers.authorization
-      // );
-
-      // return res.status(200).send({
-      //   status: "success",
-      //   user: user,
-      //   accessToken: accessToken,
-      //   refreshToken: refreshToken,
-      // });
       return res.send(
         await this.service.refreshToken(req.headers.authorization)
       );

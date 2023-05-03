@@ -115,7 +115,7 @@ export default class AuthService extends BaseService {
           email: data.email || "",
           phoneNo: data.phone || "",
           avatar: data.avatar,
-          confirmationCode: { create: { confirmCode: generatedCode } },
+          confirmationCode: {create: {confirmCode: generatedCode}}
         } as Prisma.UserCreateInput,
       })
       .then(async (r) => {
@@ -141,8 +141,11 @@ export default class AuthService extends BaseService {
       code: generatedCode,
     };
 
-    await axios
+     axios
       .post(`${process.env.EMAIL_SERVICE}/confirmation`, sendData)
+      .then((r) => {
+        // console.log(r);
+      })
       .catch((e) => {
         console.log(e);
       });
