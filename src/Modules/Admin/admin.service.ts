@@ -87,16 +87,24 @@ export default class AdminService extends BaseService {
 
   getVendorStat = async () => {
     const result = await this.db.$queryRaw`select 
-    "Vendor".*, 
-    "users"."firstName",
-    "users"."email",
-    "users"."phoneNo",
-    
+    "Vendor"."id",
+    "Vendor"."username",
+    "Vendor"."phone",
+    "Vendor"."name",
+    "Vendor"."userId",
+    "Vendor"."certified",
+    "Vendor"."status",
+    "Vendor"."desc",
+    "Vendor".created_at as createdAt,
+    "Vendor".updated_at as updatedAt,
+    "users"."firstName" as user_firstName,
+    "users"."email" as user_email,
+    "users"."phoneNo" as user_phoneNo,
     count("Reservation") as "sale" from "Vendor"
-    inner join "Product" on "Product"."vendorId" = "Vendor".id
-    inner join "Reservation" on "Reservation"."productId" = "Product".id
     inner join "users" on "Vendor"."userId" = "users".id
-    group by 1, "users".id
+    left join "Product" on "Product"."vendorId" = "Vendor".id
+    left join "Reservation" on "Reservation"."productId" = "Product".id
+    group by "Vendor".id , "users".id
     `.then((r: any) => {
       r.map((row: any) => {
         row.sale = parseInt(row.sale);
