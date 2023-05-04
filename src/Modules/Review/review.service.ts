@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import BaseService from "../Base/BaseService";
+import UserDTO from "../Authentication/Types/UserDTO";
 
 export default class ReviewService extends BaseService {
   private userQuerySelectConfig = {
@@ -34,16 +35,17 @@ export default class ReviewService extends BaseService {
 
   postReview = async (
     productId: string,
-    username: string,
+    user: UserDTO,
     reservationId: string,
-    rating: 1 | 2 | 3 | 4 | 5,
+    rating: number,
     feedback: string
   ) => {
+
     let result = await this.db.review.create({
       data: {
         product: { connect: { id: productId } },
         reservation: { connect: { id: reservationId } },
-        user: { connect: { username: username } },
+        user: { connect: { username: user.id } },
         rating: rating,
         feedback: feedback,
       },

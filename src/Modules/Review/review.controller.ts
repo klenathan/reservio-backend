@@ -26,11 +26,11 @@ export default class ReviewController extends BaseController {
 
   postReview = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const productId = req.params.id;
-      const username = req.body.user;
-      const rating = req.body.rating;
+      const productId = req.body.productId;
+      const user = req.body.user;
+      const rating = parseInt(req.body.rating);
       const feedback = req.body.feedback;
-      const reservationId = req.params.reservationId;
+      const reservationId = req.body.reservationId;
 
       if (![1, 2, 3, 4, 5].includes(rating)) {
         throw new CustomError(
@@ -39,10 +39,12 @@ export default class ReviewController extends BaseController {
           422
         );
       }
+      
+      
       return res.send(
         await this.service.postReview(
           productId,
-          username,
+          user,
           reservationId,
           rating,
           feedback

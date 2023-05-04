@@ -32,7 +32,11 @@ export default class UserService extends BaseService {
   getSingleUserByUsername = async (username: string) => {
     return await this.db.user.findFirstOrThrow({
       where: { username: username, status: "ACTIVATE" },
-      select: this.userQuerySelectConfig,
+      select: {
+        ...this.userQuerySelectConfig,
+        reservations: true,
+        reviews: true,
+      },
     });
   };
 

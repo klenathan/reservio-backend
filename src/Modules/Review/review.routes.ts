@@ -8,9 +8,9 @@ export default class ReviewRouter extends BaseRouter {
     super(db);
 
     let controller = new ReviewController(db);
-    this.router.get("/service/:id", controller.getServiceReview);
+    this.router.get("/:id", controller.getServiceReview);
     this.router.post(
-      "/service/:id",
+      "/",
       JWTValidatorMiddleware,
       controller.postReview
     );

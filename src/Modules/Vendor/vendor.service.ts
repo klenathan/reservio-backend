@@ -21,6 +21,12 @@ export default class VendorService extends BaseService {
     },
   };
 
+  private reservationQueryOption = {
+    customer: this.includeUserConfig,
+    Product: true,
+    ProductFixedTimeSlot: true,
+  };
+
   constructor(db: PrismaClient) {
     super(db);
   }
@@ -59,6 +65,19 @@ export default class VendorService extends BaseService {
         },
       });
       return res;
+    };
+
+    const getReservations = async () => {
+      return this.db.reservation.findMany({
+        where: {
+          Product: {
+            vendor: { username: username },
+          },
+        },
+        include: {
+          ...this.reservationQueryOption,
+        },
+      });
     };
 
     const getVendorCategory = async () => {
@@ -101,16 +120,18 @@ export default class VendorService extends BaseService {
     };
 
     console.time();
-    const [avgRating, vendor, category] = await Promise.all([
+    const [avgRating, vendor, category, reservations] = await Promise.all([
       getAvgRating(),
       getVendor(),
       getVendorCategory(),
+      getReservations()
     ]);
     console.timeEnd();
     return {
       rating: { _avg: avgRating.avg, _count: avgRating.count },
       ...vendor,
       category: category,
+      reservations: reservations,
     };
   };
 
@@ -153,15 +174,6 @@ export default class VendorService extends BaseService {
       },
     });
   };
-
-  // "Vendor".username,
-  // "Vendor".certified,
-  // "Vendor".status,
-  // "Vendor".desc,
-  // "Vendor".created_at,
-  // "Vendor".updated_at,
-  // "Vendor".name,
-  // "Vendor".phone
 
   getRevenuetFromUsernameByCategory = async (
     username: string,

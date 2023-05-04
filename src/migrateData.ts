@@ -88,25 +88,30 @@ async function migrateDiscount() {
 
 async function migrateReview() {
   let reviews = [];
-  let users = await prisma.user.findMany({
-    take: 20,
+  let reservation = await prisma.reservation.findMany({
+    include: {customer: true},
   });
 
-  let products = await prisma.product.findMany();
+  // let products = await prisma.product.findMany();
 
-  for (let i = 0; i < products.length; i++) {
-    let numberOfReview = Math.floor(Math.random() * users.length) + 10;
-    for (let j = 0; j < numberOfReview; j++) {
-      //   console.log(users[j]);
-      if (users[j] == undefined) continue;
-      let newReview = {
-        productId: products[i].id,
-        userId: users[j].id || "pvdong",
-        rating: Math.floor(Math.random() * 4) + 2,
-        feedback: faker.lorem.sentence(),
-      };
-      reviews.push(newReview);
-    }
+  // for (let i = 0; i < products.length; i++) {
+  //   let numberOfReview = Math.floor(Math.random() * reservation.length) + 10;
+  //   for (let j = 0; j < numberOfReview; j++) {
+
+  //   }
+  // }
+
+  for (let i = 0; i < reservation.length; i++) {
+    // if (users[j] == undefined) continue;
+    let newReview = {
+      productId: reservation[i].productId,
+      userId: reservation[i].customer.id,
+      reservationId: reservation[i].id,
+      rating: Math.floor(Math.random() * 4) + 2,
+      feedback: faker.lorem.sentence(),
+    };
+    reviews.push(newReview);
+    console.log(newReview);
   }
 
   await prisma.review
