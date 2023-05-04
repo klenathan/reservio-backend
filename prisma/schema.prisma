@@ -92,9 +92,10 @@ model Reservation {
   userId   String
   customer User   @relation(fields: [userId], references: [id])
 
-  quantity Int
-  status   ReservationStatus @default(PENDING)
-  total    Int
+  quantity   Int
+  status     ReservationStatus @default(PENDING)
+  total      Int
+  acceptedAt DateTime?
 
   discount   Discount? @relation(fields: [discountId], references: [id])
   discountId String?
@@ -110,6 +111,7 @@ model Reservation {
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
+  Review    Review[]
 }
 
 enum ReservationStatus {
@@ -158,13 +160,15 @@ model ProductFixedTimeSlot {
 }
 
 model Review {
-  id        String  @id @default(uuid())
-  userId    String
-  user      User    @relation(fields: [userId], references: [id])
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
-  rating    Int
-  feedback  String  @db.Text
+  id            String      @id @default(uuid())
+  userId        String
+  reservationId String      @unique
+  reservation   Reservation @relation(fields: [reservationId], references: [id])
+  user          User        @relation(fields: [userId], references: [id])
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id])
+  rating        Int
+  feedback      String      @db.Text
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")

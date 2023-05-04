@@ -30,6 +30,7 @@ export default class ReviewController extends BaseController {
       const username = req.body.user;
       const rating = req.body.rating;
       const feedback = req.body.feedback;
+      const reservationId = req.params.reservationId;
 
       if (![1, 2, 3, 4, 5].includes(rating)) {
         throw new CustomError(
@@ -39,7 +40,13 @@ export default class ReviewController extends BaseController {
         );
       }
       return res.send(
-        await this.service.postReview(productId, username, rating, feedback)
+        await this.service.postReview(
+          productId,
+          username,
+          reservationId,
+          rating,
+          feedback
+        )
       );
     } catch (e) {
       next(e);

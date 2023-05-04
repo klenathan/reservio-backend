@@ -113,7 +113,7 @@ export default class ReservationService extends BaseService {
       );
     } else {
       ////// For flexible product
-      
+
       return await newFlexibleServiceReservation(
         this.db,
         data,
@@ -140,14 +140,22 @@ export default class ReservationService extends BaseService {
 
   updateReservationStatus = async (
     reservationId: string,
-    status: "PENDING" | "REJECTED" | "ACCEPTED"
+    status: "PENDING" | "REJECTED" | "ACCEPTED" | "ONGOING" | "FINISHED"
   ) => {
+    let acceptedConfig = {};
+    if (status == "ACCEPTED") {
+      acceptedConfig = {
+        acceptedAt: new Date(),
+      };
+    }
+
     let reservation = await this.db.reservation.update({
       where: {
         id: reservationId,
       },
       data: {
         status: status,
+        ...acceptedConfig,
       },
       include: this.reservationQueryOption,
     });

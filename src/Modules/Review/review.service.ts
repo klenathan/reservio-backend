@@ -35,12 +35,14 @@ export default class ReviewService extends BaseService {
   postReview = async (
     productId: string,
     username: string,
+    reservationId: string,
     rating: 1 | 2 | 3 | 4 | 5,
     feedback: string
   ) => {
     let result = await this.db.review.create({
       data: {
         product: { connect: { id: productId } },
+        reservation: { connect: { id: reservationId } },
         user: { connect: { username: username } },
         rating: rating,
         feedback: feedback,
