@@ -25,6 +25,19 @@ export default class ReservationController extends BaseController {
     }
   };
 
+  getSingleReservation = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      let result = await this.service.getSingleReservation(req.params.id);
+      return res.status(200).send(result);
+    } catch (e) {
+      next(e);
+    }
+  };
+
   newReservation = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!(req.body.user && req.body.productId && req.body.quantity)) {
