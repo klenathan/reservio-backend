@@ -12,7 +12,7 @@ export default class ReservationRouter extends BaseRouter {
     this.router.get(
       "/:id",
       JWTValidatorMiddleware,
-      controller.acceptReservation
+      controller.getSingleReservation
     );
     this.router.put(
       "/accept/:id",

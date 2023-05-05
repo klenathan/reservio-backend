@@ -31,7 +31,12 @@ export default class ReservationService extends BaseService {
     customer: {
       select: this.userQuerySelectConfig,
     },
-    Product: true,
+
+    Product: {
+      include: {
+        vendor: true,
+      },
+    },
     ProductFixedTimeSlot: true,
   };
 
