@@ -15,9 +15,12 @@ export default class SearchController extends BaseController {
       if (!req.query.query) {
         throw new NotFoundError("INVALID_QUERY", "No query found on request");
       }
-    //   console.log(req.query.query);
+      let query = (req.query.query as string).replace(/%20/g, " ");
+      if (query.split(" ").length >= 2) {
+        query = query.split(" ").join(" | ") 
+      }
       
-      return res.status(200).send(await this.service.search(req.query.query as string));
+      return res.status(200).send(await this.service.search(query));
     } catch (e) {
       next(e);
     }

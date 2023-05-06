@@ -6,6 +6,7 @@ export default class SeachService extends BaseService {
     super(db);
   }
   search = async (query: string) => {
+    
     const userQuery = async () => {
       return await this.db.vendor.findMany({
         include: {
