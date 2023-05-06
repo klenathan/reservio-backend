@@ -32,6 +32,8 @@ export default class ProductController extends BaseController {
     try {
       //productSorting
       //productFiltering
+      console.log(req.query);
+      
       return res.send(await this.service.productFiltering(req.query));
     } catch (e) {
       next(e);

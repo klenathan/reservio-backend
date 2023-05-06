@@ -210,19 +210,19 @@ export default class ProductService extends BaseService {
   @param {number} [take=20] - The number of products to retrieve.
   @returns {Promise<Array<Product>>} - The array of products that match the filter and sorting options.
   */
-  productFiltering = async (
-    query: any,
-    take?: number
-  ): Promise<Array<Product>> => {
+  productFiltering = async (query: any): Promise<Array<Product>> => {
     const filter = this.constructFilterOption(query);
     const sort = this.constructSortingOption(query);
+
+    const take = query.take &&
+      parseInt(query.take) > 0 && { take: parseInt(query.take) };
 
     return await this.db.product.findMany({
       where: {
         ...filter,
       },
       orderBy: sort,
-      take: take || 20,
+      ...take,
       include: {
         vendor: { include: { user: this.includeUserConfig } },
         ProductFixedTimeSlot: true,
