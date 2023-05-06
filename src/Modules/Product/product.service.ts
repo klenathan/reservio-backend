@@ -32,27 +32,6 @@ export default class ProductService extends BaseService {
     super(db);
   }
 
-  // getAllProduct = async () => {
-  //   return await this.db.product.findMany({
-  //     orderBy: {
-  //       reviews: {
-  //         _count: "desc",
-  //       },
-  //     },
-  //     include: {
-  //       vendor: { include: { user: this.includeUserConfig } },
-  //       ProductFixedTimeSlot: true,
-  //       reviews: true,
-  //       _count: {
-  //         select: {
-  //           reviews: true,
-  //           Reservation: true,
-  //         },
-  //       },
-  //     },
-  //   });
-  // };
-
   getHighlightProduct = async () => {
     return await this.db.product.findMany({
       take: 10,
@@ -294,6 +273,9 @@ export default class ProductService extends BaseService {
       );
     }
 
+    if (images.length == 0) {
+      throw new CustomError("MISSING_IMAGE", "Missing product image", 422);
+    }
     // Upload product images
     const imagesUploaded = await handleUploadMultipleProductImage(images);
 
