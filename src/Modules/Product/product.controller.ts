@@ -33,7 +33,7 @@ export default class ProductController extends BaseController {
       //productSorting
       //productFiltering
       console.log(req.query);
-      
+
       return res.send(await this.service.productFiltering(req.query));
     } catch (e) {
       next(e);
@@ -84,23 +84,23 @@ export default class ProductController extends BaseController {
 
   newProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      console.log("controller", req.body);
+      // return res.send(req.body);
       if (req.body.user.vendor == null) {
         throw new UnauthorizedError("UNAUTHORIZED", "You are not yet a vendor");
       }
-
       if (!req.files) {
         throw new CustomError("MISSING_IMG", "Missing service images", 422);
       }
 
-      return res
-        .status(200)
-        .send(
-          await this.service.createProduct(
-            req.body,
-            req.files as Express.Multer.File[]
-          )
-        );
+      return res.send(
+        await this.service.createProduct(
+          req.body,
+          req.files as Express.Multer.File[]
+        )
+      );
     } catch (e) {
+      console.log(e);
       next(e);
     }
   };
@@ -131,7 +131,6 @@ export default class ProductController extends BaseController {
   newDiscount = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.body.user.admin) {
-        
         throw new UnauthorizedError(
           "UNAUTHORIZED",
           `${req.body.user.username} is not admin, only admin can create new discount`

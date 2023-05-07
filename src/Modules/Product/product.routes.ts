@@ -31,3 +31,4 @@ export default class ProductRouter extends BaseRouter {
     this.router.delete("/:id");
   }
 }
+ 

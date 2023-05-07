@@ -69,7 +69,7 @@ export default class ReservioServer {
     this.instance.use(express.urlencoded({ extended: true }));
 
     this.instance.use(upload.any());
-    this.instance.use(trafficLogMiddleware);
+    // this.instance.use(trafficLogMiddleware);
   }
 
   private routing() {

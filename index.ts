@@ -19,5 +19,9 @@ const server = new ReservioServer(8080, db);
 if (process.env.STAGE == "dev") {
   server.start();
 } else {
-  module.exports.handler = ServerlessHttp(server.getInstance());
+  try {
+    module.exports.handler = ServerlessHttp(server.getInstance());
+  } catch (error) {
+    console.log(error);
+  }
 }

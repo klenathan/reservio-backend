@@ -5,6 +5,7 @@ provider:
   name: aws
   runtime: nodejs18.x
   region: ap-southeast-1
+  timeout: 30
   environment:
     EMAIL_PW: ${env:EMAIL_PW}
     DATABASE_URL: ${env:DATABASE_URL}

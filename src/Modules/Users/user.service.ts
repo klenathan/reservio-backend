@@ -34,7 +34,26 @@ export default class UserService extends BaseService {
       where: { username: username, status: "ACTIVATE" },
       select: {
         ...this.userQuerySelectConfig,
-        reservations: true,
+        reservations: {
+          include: {
+            Product: {
+              include: {
+                vendor: {
+                  include: { user: { select: this.userQuerySelectConfig } },
+                },
+                ProductFixedTimeSlot: true,
+                reviews: true,
+                _count: {
+                  select: {
+                    reviews: true,
+                    Reservation: true,
+                  },
+                },
+              },
+            },
+            ProductFixedTimeSlot: true,
+          },
+        },
         reviews: true,
       },
     });

@@ -20,7 +20,7 @@ export default async function handleUploadMultipleProductImage(
 
   const client = new S3Client(config);
   let result: string[] = [];
-
+  
   for (let img of imgArr) {
     let imgName = `products/${randomUUID()}-${img.originalname}`;
     let command = new PutObjectCommand({
@@ -32,7 +32,7 @@ export default async function handleUploadMultipleProductImage(
       await client.send(command);
       result.push(imgName);
     } catch (err: any) {
-      console.log(err);
+      console.log("Image upload err", err);
       throw new CustomError(err.name, err.message, 400);
     }
   }

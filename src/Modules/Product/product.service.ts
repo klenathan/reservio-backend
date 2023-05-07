@@ -246,13 +246,13 @@ export default class ProductService extends BaseService {
    * Creates a new product and uploads images for it
    * @param {NewProductDTO} data - The data for the new product
    * @param {Express.Multer.File[]} images - The images to upload for the product
-   * @returns {Promise<Product>} A  newly created product
    */
   createProduct = async (
     data: NewProductDTO,
     images: Express.Multer.File[]
-  ): Promise<Product> => {
+  ) => {
     let result;
+    // console.log("service", data);
 
     // Validate required fields
     if (!(data.name && data.price)) {
@@ -276,8 +276,10 @@ export default class ProductService extends BaseService {
     if (images.length == 0) {
       throw new CustomError("MISSING_IMAGE", "Missing product image", 422);
     }
+
     // Upload product images
     const imagesUploaded = await handleUploadMultipleProductImage(images);
+    console.log("img:", imagesUploaded);
 
     // Create the product based on its type
     if (data.type === "FLEXIBLE") {
@@ -288,14 +290,14 @@ export default class ProductService extends BaseService {
           422
         );
       }
-      result = await this.db.product.create({
+      return await this.db.product.create({
         data: {
           vendor: { connect: { id: data.user.vendor.id } },
           name: data.name,
           images: imagesUploaded,
-          category: data.category,
+          category: data.category || "Others",
           address: data.address || "Ho Chi Minh city",
-          price: parseInt(data.price as unknown as string),
+          price: parseInt(data.price as any),
           quantity: parseInt(data.quantity as any),
           desc: data.desc || "",
           type: data.type,
