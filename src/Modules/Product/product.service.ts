@@ -252,7 +252,6 @@ export default class ProductService extends BaseService {
     images: Express.Multer.File[]
   ) => {
     let result;
-    // console.log("service", data);
 
     // Validate required fields
     if (!(data.name && data.price)) {
@@ -277,6 +276,7 @@ export default class ProductService extends BaseService {
       throw new CustomError("MISSING_IMAGE", "Missing product image", 422);
     }
 
+    
     // Upload product images
     const imagesUploaded = await handleUploadMultipleProductImage(images);
     console.log("img:", imagesUploaded);

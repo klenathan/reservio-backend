@@ -15,6 +15,10 @@ provider:
     AWS_SECRETE_ACCESS_KEY_: ${env:AWS_SECRETE_ACCESS_KEY_}
     PRISMA_CLI_BINARY_TARGETS: ${env:PRISMA_CLI_BINARY_TARGETS}
     EMAIL_SERVICE: ${env:EMAIL_SERVICE}
+  apiGateway:
+    binaryMediaTypes:
+      - 'multipart/form-data'
+      - '*/*'
 
 functions:
   app:

@@ -4,16 +4,35 @@ import { hashPassword } from "./Modules/Authentication/Utils/passwordUtils";
 
 let prisma = new PrismaClient({ errorFormat: "minimal" });
 
+const avatars = [
+  "avatar/325082895_731199964907498_8681959452548683267_n.jpg",
+  "avatar/IMG_1021.JPG",
+  "avatar/IMG_2969.png",
+  "avatar/pets_FILL0_wght400_GRAD0_opsz48.png",
+];
+
 function migrateUsers() {
   let admin = {
     username: "admin",
     firstName: "ADMIN",
     password: "$2a$10$zrT0C4kYZzkeNTuIIIWE2.v9o5OC7MOWQjVzOssgJFnBArUNreoTu",
     email: "admin@reservio.com",
+    // status: "ACTIVATE",
     phoneNo: "0900000000",
-    avatar: "avatar/ddd012da-fb24-4b1b-9ad0-3fa1bd3eaf75-samsung_monitor.jpg",
+    avatar: avatars[Math.floor(Math.random() * avatars.length)],
   };
-  let users = [admin];
+
+  let dong = {
+    id: "pvdong111",
+    username: "pvdong",
+    firstName: "Pham Vo Dong",
+    password: "$2a$10$zrT0C4kYZzkeNTuIIIWE2.v9o5OC7MOWQjVzOssgJFnBArUNreoTu",
+    email: "pvdong@reservio.com",
+    // status: "ACTIVATE",
+    phoneNo: "0900000000",
+    avatar: avatars[Math.floor(Math.random() * avatars.length)],
+  };
+  let users = [admin, dong];
   for (let i = 0; i < 100; i++) {
     let newUser = {
       username: faker.internet.userName().toLocaleLowerCase(),
@@ -21,7 +40,7 @@ function migrateUsers() {
       password: "$2a$10$zrT0C4kYZzkeNTuIIIWE2.v9o5OC7MOWQjVzOssgJFnBArUNreoTu",
       email: faker.internet.email(),
       phoneNo: faker.phone.number("09########"),
-      avatar: "avatar/ddd012da-fb24-4b1b-9ad0-3fa1bd3eaf75-samsung_monitor.jpg",
+      avatar: avatars[Math.floor(Math.random() * avatars.length)],
     };
     users.push(newUser);
   }
@@ -36,13 +55,24 @@ function migrateUsers() {
     });
 }
 
+const products = ["products/1.jpg", "products/5.jpg", "products/7.jpg"];
 async function migrateServices() {
+  let vendor = await prisma.vendor.create({data: {
+    id: "pvdong111",
+    name: "dong #1 wjbu",
+    desc: "Dong shop",
+    username: "pvdong",
+    userId: "pvdong111"
+  }})
   let services = [];
   for (let i = 0; i < 100; i++) {
     let newService = {
-      vendorId: "clgt63tz80000xnja2hjlhxim", //pvdong
+      vendorId: "pvdong111", //pvdong
       name: faker.commerce.productName(),
-      images: ["a83f578e-77e4-44c8-ab40-73314ba28ceb-current_best.png"],
+      images: [
+        products[Math.floor(Math.random() * products.length)],
+        products[Math.floor(Math.random() * products.length)],
+      ],
       address:
         "702 Đ. Nguyễn Văn Linh, Tân Hưng, Quận 7, Thành phố Hồ Chí Minh",
       price: 192000,
@@ -89,17 +119,8 @@ async function migrateDiscount() {
 async function migrateReview() {
   let reviews = [];
   let reservation = await prisma.reservation.findMany({
-    include: {customer: true},
+    include: { customer: true },
   });
-
-  // let products = await prisma.product.findMany();
-
-  // for (let i = 0; i < products.length; i++) {
-  //   let numberOfReview = Math.floor(Math.random() * reservation.length) + 10;
-  //   for (let j = 0; j < numberOfReview; j++) {
-
-  //   }
-  // }
 
   for (let i = 0; i < reservation.length; i++) {
     // if (users[j] == undefined) continue;
@@ -127,7 +148,8 @@ async function migrateReview() {
     });
 }
 
-// migrateUsers()
-// migrateServices()
-// migrateDiscount()
-// migrateReview();
+migrateUsers();
+
+migrateServices();
+migrateDiscount();
+migrateReview();

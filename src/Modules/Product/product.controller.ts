@@ -84,8 +84,6 @@ export default class ProductController extends BaseController {
 
   newProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      console.log("controller", req.body);
-      // return res.send(req.body);
       if (req.body.user.vendor == null) {
         throw new UnauthorizedError("UNAUTHORIZED", "You are not yet a vendor");
       }
