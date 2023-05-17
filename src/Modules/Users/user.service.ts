@@ -34,6 +34,7 @@ export default class UserService extends BaseService {
       where: { username: username, status: "ACTIVATE" },
       select: {
         ...this.userQuerySelectConfig,
+        _count: { select: { reservations: true } },
         reservations: {
           include: {
             Product: {

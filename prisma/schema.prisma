@@ -120,6 +120,7 @@ enum ReservationStatus {
   ACCEPTED
   ONGOING
   FINISHED
+  RATED
 }
 
 model Product {

@@ -38,6 +38,7 @@ export default class ReservationService extends BaseService {
       },
     },
     ProductFixedTimeSlot: true,
+    Review: true,
   };
 
   constructor(db: PrismaClient) {

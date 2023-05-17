@@ -149,7 +149,6 @@ async function migrateReview() {
 }
 
 migrateUsers();
-
-migrateServices();
-migrateDiscount();
-migrateReview();
+// migrateServices();
+// migrateDiscount();
+// migrateReview();

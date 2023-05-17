@@ -40,7 +40,6 @@ export default class ReviewService extends BaseService {
     rating: number,
     feedback: string
   ) => {
-
     let result = await this.db.review.create({
       data: {
         product: { connect: { id: productId } },
@@ -49,6 +48,13 @@ export default class ReviewService extends BaseService {
         rating: rating,
         feedback: feedback,
       },
+    });
+
+    let resv = await this.db.reservation.update({
+      data: {
+        status: "RATED",
+      },
+      where: { id: reservationId },
     });
 
     return result;
