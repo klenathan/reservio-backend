@@ -16,6 +16,7 @@ import confirmationEmailTemplate from "@/Utils/emailTemplates/confirmationEmailT
 import axios from "axios";
 import validateRefreshToken from "./Utils/validateRefreshToken";
 import UserDTO from "./Types/UserDTO";
+import UnauthorizedError from "@/Errors/UnauthorizedError";
 
 export default class AuthService extends BaseService {
   private userQuerySelectConfig = {
@@ -41,7 +42,7 @@ export default class AuthService extends BaseService {
 
   handleLogin = async (username: string, password: string) => {
     let user = await this.db.user.findFirstOrThrow({
-      where: { username: username, status: "ACTIVATE" },
+      where: { username: username},
       include: { vendor: true, admin: true },
     });
 
@@ -49,6 +50,13 @@ export default class AuthService extends BaseService {
       throw new UnauthenticatedError(
         "WRONG_CREDENTIAL",
         `Wrong credential for user ${username}`
+      );
+    }
+
+    if (!(user.status == "ACTIVATE" )) {
+      throw new UnauthenticatedError(
+        "NOT_YET_ACTIVATED",
+        `${username} has not activated`
       );
     }
 
@@ -115,7 +123,7 @@ export default class AuthService extends BaseService {
           email: data.email || "",
           phoneNo: data.phone || "",
           avatar: data.avatar,
-          confirmationCode: {create: {confirmCode: generatedCode}}
+          confirmationCode: { create: { confirmCode: generatedCode } },
         } as Prisma.UserCreateInput,
       })
       .then(async (r) => {
@@ -141,7 +149,7 @@ export default class AuthService extends BaseService {
       code: generatedCode,
     };
 
-     axios
+    axios
       .post(`${process.env.EMAIL_SERVICE}/confirmation`, sendData)
       .then((r) => {
         // console.log(r);
@@ -165,6 +173,11 @@ export default class AuthService extends BaseService {
         where: { username: confirmation.user.username },
         data: { status: "ACTIVATE" },
       });
+    } else {
+      throw new UnauthorizedError(
+        "WRONG_CONFIRMATION_CODE",
+        `Invailid confirmation code for ${username}`
+      );
     }
 
     return {

@@ -34,9 +34,11 @@ export default async function newFixedServiceReservation(
   productResult: any,
   discountRate: number
 ) {
-//   console.log(productResult);
+  //   console.log(productResult);
 
   const quantityInt = parseInt(data.quantity);
+  // console.log(productResult.Reservation);
+
   productResult.ProductFixedTimeSlot.forEach(
     (
       element: ProductFixedTimeSlot & {
@@ -44,12 +46,13 @@ export default async function newFixedServiceReservation(
         ProuctReservation: Reservation[];
       }
     ) => {
+      console.log(element);
+
       if (element.id == data.productFixedTimeSlotId) {
-        // console.log("element", element.ProuctReservation);
-        
         const placedSlot = element.ProuctReservation.reduce(
           (a: any, b: any) => {
-            return a + b.quantity},
+            if (b.status != "PENDING") return a + b.quantity;
+          },
           0
         );
         const slotLeft = element.quantity - placedSlot;

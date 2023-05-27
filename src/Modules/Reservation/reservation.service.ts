@@ -119,7 +119,6 @@ export default class ReservationService extends BaseService {
       );
     } else {
       ////// For flexible product
-
       return await newFlexibleServiceReservation(
         this.db,
         data,
