@@ -40,11 +40,15 @@ export default class ReviewService extends BaseService {
     rating: number,
     feedback: string
   ) => {
+    // console.log(productId, user, reservationId, rating, feedback);
+
+    console.log(user.id);
+
     let result = await this.db.review.create({
       data: {
         product: { connect: { id: productId } },
         reservation: { connect: { id: reservationId } },
-        user: { connect: { username: user.id } },
+        user: { connect: { id: user.id } },
         rating: rating,
         feedback: feedback,
       },
