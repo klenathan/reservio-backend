@@ -6,6 +6,7 @@ import {
 } from "@prisma/client";
 import DTONewReservation from "../types/DTONewReservation";
 import CustomError from "@/Errors/CustomError";
+import NotEnoughSlot from "../Error/NotEnoughSlot";
 
 const userQuerySelectConfig = {
   id: true,
@@ -46,21 +47,23 @@ export default async function newFixedServiceReservation(
         ProuctReservation: Reservation[];
       }
     ) => {
-      console.log(element);
-
       if (element.id == data.productFixedTimeSlotId) {
         const placedSlot = element.ProuctReservation.reduce(
           (a: any, b: any) => {
             if (b.status != "PENDING") return a + b.quantity;
+            else return a;
           },
           0
         );
+        
+
         const slotLeft = element.quantity - placedSlot;
         if (quantityInt > slotLeft) {
-          throw new CustomError(
+          throw new NotEnoughSlot(
             "QUANTITY_EXCEEDED",
+            422,
             `Not enough quantity left. ${slotLeft} / ${element.quantity} is not enough for ${quantityInt}`,
-            422
+            slotLeft
           );
         }
       }

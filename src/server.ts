@@ -27,6 +27,8 @@ import ReservationRouter from "./Modules/Reservation/reservation.routes";
 import ReviewRouter from "./Modules/Review/review.routes";
 import trafficLogMiddleware from "./Middlewares/trafficLogMiddleware";
 import AdminRouter from "./Modules/Admin/admin.routes";
+import NotEnoughSlot from "./Modules/Reservation/Error/NotEnoughSlot";
+import { error } from "console";
 
 export default class ReservioServer {
   public instance: Application;
@@ -105,7 +107,11 @@ export default class ReservioServer {
   private errorHandling() {
     this.instance.use(
       (
-        error: CustomError | PrismaClientKnownRequestError | Error,
+        error:
+          | NotEnoughSlot
+          | CustomError
+          | PrismaClientKnownRequestError
+          | Error,
         req: Request,
         res: Response,
         next: NextFunction
@@ -115,6 +121,14 @@ export default class ReservioServer {
             error: ErrorCode[error.code] as string,
             message: error.message,
             code: error.code,
+          });
+        } else if (error.name == "QUANTITY_EXCEEDED") {
+          let error_any: any = error;
+          return res.status(error_any.statusCode).json({
+            error: error_any.name,
+            message: error_any.message,
+            code: error_any.statusCode,
+            slotLeft: error_any.slotLeft,
           });
         } else if (error instanceof CustomError) {
           return res.status(error.statusCode).json({
