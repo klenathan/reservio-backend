@@ -7,6 +7,7 @@ import {
 } from "@prisma/client";
 import DTONewReservation from "../types/DTONewReservation";
 import CustomError from "@/Errors/CustomError";
+import NotEnoughSlot from "../Error/NotEnoughSlot";
 
 const userQuerySelectConfig = {
   id: true,
@@ -43,20 +44,22 @@ export default async function newFlexibleServiceReservation(
   const orderQuantity = parseInt(data.quantity);
 
   const placedSlot = productResult.Reservation.reduce((a: any, b: any) => {
-    return a + b.quantity;
+    if (b.status != "PENDING") return a + b.quantity;
+    else return a;
   }, 0);
 
   const slotLeft = productResult.quantity - placedSlot;
 
   if (orderQuantity > slotLeft) {
-    throw new CustomError(
+    throw new NotEnoughSlot(
       "QUANTITY_EXCEEDED",
+      422,
       `Not enough quantity left. ${slotLeft} / ${
         productResult.quantity
       } is not enough for ${orderQuantity} from '${new Date(
         parseInt(data.startAt)
       ).toISOString()}' to '${new Date(parseInt(data.endAt)).toISOString()}'`,
-      422
+      slotLeft
     );
   }
 

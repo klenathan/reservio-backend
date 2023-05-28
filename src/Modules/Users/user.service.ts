@@ -1,6 +1,7 @@
 import NotFoundError from "@/Errors/NotFoundError";
 import { Prisma, PrismaClient, User } from "@prisma/client";
 import BaseService from "../Base/BaseService";
+import generateTokenPair from "../Authentication/Utils/generateTokenPair";
 
 export default class UserService extends BaseService {
   private userQuerySelectConfig = {
@@ -61,10 +62,21 @@ export default class UserService extends BaseService {
   };
 
   updateById = async (id: string, data: Prisma.UserUpdateInput) => {
-    return await this.db.user.update({
+    const user = await this.db.user.update({
       where: { id: id },
       data: data,
     });
+
+    let { password: _, ...returnData } = user;
+
+    const [accessToken, refreshToken] = generateTokenPair(returnData);
+
+    return {
+      status: "success",
+      user: returnData,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+    };
   };
 
   deleteByUsername = async (username: string) => {

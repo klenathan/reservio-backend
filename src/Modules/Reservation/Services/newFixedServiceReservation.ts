@@ -56,7 +56,6 @@ export default async function newFixedServiceReservation(
           0
         );
         
-
         const slotLeft = element.quantity - placedSlot;
         if (quantityInt > slotLeft) {
           throw new NotEnoughSlot(
@@ -72,6 +71,7 @@ export default async function newFixedServiceReservation(
   let totalBill = Math.ceil(
     quantityInt * productResult.price * ((100 - discountRate) / 100)
   );
+  
   if (totalBill > 2147483647) {
     throw new CustomError(
       "ORDER_TOO_LARGE",
